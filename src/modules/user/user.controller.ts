@@ -1,41 +1,42 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  ParseIntPipe,
-  Query,
-  HttpCode,
-} from '@nestjs/common';
-import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { ParseOffsetPipe } from '@pipes/parseOffset.pipe';
-import { ParseLimitPipe } from '@pipes/parseLimit.pipe';
-import { ParseWherePipe } from '@pipes/parseWhere.pipe';
-import { IncludeOptions, OrderItem } from 'sequelize';
-import { ParseIncludePipe } from '@pipes/parseInclude.pipe';
-import { ParseOrderPipe } from '@pipes/parseOrder.pipe';
+import { ArrayWhereOptions } from '@libraries/baseModel.entity';
+import { IsRole } from '@modules/auth/decorators/isRole.decorator';
+import { IsSelfUserOrIsRole } from '@modules/auth/decorators/isSelfUserOrIsRole.decorator';
 import { ValidateJWT } from '@modules/auth/decorators/validateJWT.decorator';
+import { ROLES } from '@modules/role/enums/roles.enum';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { ApiExtraModels, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { User } from './entities/user.entity';
 import { ParseAttributesPipe } from '@pipes/parseAttributes.pipe';
-import { ApiQueryAttributes } from '@swagger/parameters/attributes.decorator';
-import { ApiQueryWhere } from '@swagger/parameters/where.decorator';
-import { ApiQueryInclude } from '@swagger/parameters/include.decorator';
-import { ApiOkResponsePaginatedData } from '@swagger/httpResponses/OkPaginatedData.decorator';
-import { ApiQueryPagination } from '@swagger/utils/pagination.decorator';
-import { ApiCommonResponses } from '@swagger/utils/commonResponses.decorator';
+import { ParseIncludePipe } from '@pipes/parseInclude.pipe';
+import { ParseLimitPipe } from '@pipes/parseLimit.pipe';
+import { ParseOffsetPipe } from '@pipes/parseOffset.pipe';
+import { ParseOrderPipe } from '@pipes/parseOrder.pipe';
+import { ParseWherePipe } from '@pipes/parseWhere.pipe';
 import { ApiCreatedResponseData } from '@swagger/httpResponses/Created.decorator';
 import { ApiOkResponseData } from '@swagger/httpResponses/Ok.decorator';
-import { IsSelfUserOrIsRole } from '@modules/auth/decorators/isSelfUserOrIsRole.decorator';
-import { ROLES } from '@modules/role/enums/roles.enum';
-import { IsRole } from '@modules/auth/decorators/isRole.decorator';
+import { ApiOkResponsePaginatedData } from '@swagger/httpResponses/OkPaginatedData.decorator';
+import { ApiQueryAttributes } from '@swagger/parameters/attributes.decorator';
+import { ApiQueryInclude } from '@swagger/parameters/include.decorator';
+import { ApiQueryWhere } from '@swagger/parameters/where.decorator';
+import { ApiCommonResponses } from '@swagger/utils/commonResponses.decorator';
+import { ApiQueryPagination } from '@swagger/utils/pagination.decorator';
+import { IncludeOptions, OrderItem } from 'sequelize';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
-import { ArrayWhereOptions } from '@libraries/baseModel.entity';
+import { User } from './entities/user.entity';
+import { UserService } from './user.service';
 
 @ApiExtraModels(User)
 @ApiTags('users')
@@ -71,6 +72,27 @@ export class UserController {
       include,
       order,
     });
+  }
+
+  @ApiOperation({ summary: 'Get Self User entry' })
+  @ApiCommonResponses()
+  @ApiQueryAttributes()
+  @ApiOkResponseData(UserResponseDto)
+  @ApiQueryInclude()
+  @ValidateJWT()
+  @Get('self')
+  async findSelf(
+    @Req() req: Request,
+    @Query('include', new ParseIncludePipe(User))
+    include?: IncludeOptions[],
+    @Query('attributes', ParseAttributesPipe)
+    attributes?: string[],
+  ) {
+    return await this.userService.findOne(
+      req['session']['jwt'].id,
+      include,
+      attributes,
+    );
   }
 
   @ApiOperation({ summary: 'Get User entry by id' })

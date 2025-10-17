@@ -1,9 +1,9 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-import { db } from '../../core/database/migration';
-import { SequelizeStorage, Umzug } from 'umzug';
 import { logger } from '@core/logger/Logger';
+import { SequelizeStorage, Umzug } from 'umzug';
+import { db } from '../../core/database/migration';
 
 const umzug = new Umzug({
   migrations: {
@@ -19,7 +19,7 @@ async function main() {
     await umzug.up();
     logger.info('MIGRATIONS DONE');
   } catch (err) {
-    logger.error(err);
+    console.error('error: ', err);
     process.exit();
   }
   process.exit();
