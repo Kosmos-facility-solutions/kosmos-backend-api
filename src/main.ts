@@ -1,22 +1,25 @@
-import { config } from './config';
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { PaginatedDto } from '@common/dto/paginated.dto';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
-import { Logger } from './core/logger/Logger';
-import * as morgan from 'morgan';
-import helmet from 'helmet';
+import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import expressBasicAuth from 'express-basic-auth';
-import { PaginatedDto } from '@common/dto/paginated.dto';
+import helmet from 'helmet';
+import * as morgan from 'morgan';
+import { AppModule } from './app.module';
+import { config } from './config';
+import { Logger } from './core/logger/Logger';
 
 async function bootstrap() {
-  let logger: Logger = new Logger();
+  const logger: Logger = new Logger();
   const app = await NestFactory.create(AppModule, {
     logger,
   });
 
   //SECURITY
   app.use(helmet());
+
+  //API ROUTES PREFIX
+  app.setGlobalPrefix(config.urls.apiRoot);
 
   //VERSIONING
   app.enableVersioning({
