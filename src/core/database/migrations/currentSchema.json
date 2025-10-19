@@ -207,6 +207,90 @@
       },
       "indexes": []
     },
+    "service": {
+      "tableName": "service",
+      "schema": {
+        "id": {
+          "autoIncrement": true,
+          "allowNull": true,
+          "primaryKey": true,
+          "field": "id",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "name": {
+          "allowNull": false,
+          "field": "name",
+          "seqType": "Sequelize.STRING"
+        },
+        "description": {
+          "allowNull": true,
+          "field": "description",
+          "seqType": "Sequelize.TEXT"
+        },
+        "category": {
+          "allowNull": false,
+          "field": "category",
+          "seqType": "Sequelize.ENUM('office_cleaning', 'deep_cleaning', 'floor_care', 'window_cleaning', 'carpet_care', 'sanitization', 'power_washing', 'special_event_prep')"
+        },
+        "basePrice": {
+          "allowNull": false,
+          "field": "basePrice",
+          "seqType": "Sequelize.DECIMAL(10, 2)"
+        },
+        "priceUnit": {
+          "allowNull": true,
+          "field": "priceUnit",
+          "seqType": "Sequelize.STRING"
+        },
+        "estimatedDurationMinutes": {
+          "allowNull": true,
+          "field": "estimatedDurationMinutes",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "icon": {
+          "allowNull": true,
+          "field": "icon",
+          "seqType": "Sequelize.STRING"
+        },
+        "isActive": {
+          "allowNull": false,
+          "defaultValue": {
+            "value": true
+          },
+          "field": "isActive",
+          "seqType": "Sequelize.BOOLEAN"
+        },
+        "displayOrder": {
+          "allowNull": false,
+          "defaultValue": {
+            "value": 0
+          },
+          "field": "displayOrder",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "features": {
+          "allowNull": true,
+          "field": "features",
+          "seqType": "Sequelize.JSON"
+        },
+        "requirements": {
+          "allowNull": true,
+          "field": "requirements",
+          "seqType": "Sequelize.JSON"
+        },
+        "createdAt": {
+          "allowNull": false,
+          "field": "createdAt",
+          "seqType": "Sequelize.DATE"
+        },
+        "updatedAt": {
+          "allowNull": false,
+          "field": "updatedAt",
+          "seqType": "Sequelize.DATE"
+        }
+      },
+      "indexes": []
+    },
     "user": {
       "tableName": "user",
       "schema": {
@@ -338,5 +422,5 @@
       "indexes": []
     }
   },
-  "revision": "20251017141217"
+  "revision": "20251017144200"
 }
