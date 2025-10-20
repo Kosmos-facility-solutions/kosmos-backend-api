@@ -1,7 +1,38 @@
 import * as dotenv from 'dotenv';
-import { Dialect } from 'sequelize';
 import path from 'path';
+import { Dialect } from 'sequelize';
 dotenv.config();
+
+let dbConfig;
+if (process.env.DATABASE_URL) {
+  // Parse the DATABASE_URL
+  const dbUrl = new URL(process.env.DATABASE_URL);
+  dbConfig = {
+    database: dbUrl.pathname.slice(1), // Remove leading '/'
+    username: dbUrl.username,
+    password: dbUrl.password,
+    host: dbUrl.hostname,
+    port: dbUrl.port ? parseInt(dbUrl.port) : 5432, // ⚠️ IMPORTANTE: Agregar el puerto
+    dialect: 'postgres' as Dialect,
+    storage: null,
+    logging: false,
+    timezone: 'utc',
+  };
+} else {
+  // Use individual environment variables
+  dbConfig = {
+    database: process.env.DB_NAME || 'kosmos-backend-api',
+    username: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || 'postgres',
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432, // ⚠️ También aquí
+    dialect: (process.env.DB_TYPE || 'postgres') as Dialect,
+    storage: null,
+    logging: false,
+    timezone: 'utc',
+  };
+}
+
 export const config = {
   app: {
     name: process.env.APP_NAME || 'FLUG-NEST',
@@ -13,7 +44,7 @@ export const config = {
   apiServer: process.env.API_URL,
 
   server: {
-    port: process.env.SERVER_PORT || 3000,
+    port: process.env.PORT || process.env.SERVER_PORT || 3000, // ⚠️ Priorizar PORT de Render
   },
 
   api: {
@@ -22,7 +53,7 @@ export const config = {
     offset: 0,
     page: 1,
     // Show detailed error responses or not
-    debug: true,
+    debug: process.env.NODE_ENV !== 'production', // ⚠️ Mejor práctica
     order: [['id', 'ASC']],
     properties: ['id'],
   },
@@ -103,17 +134,7 @@ export const config = {
     password: process.env.SWAGGER_PASSWORD || 'password',
     hasAuth: Boolean(process.env.SWAGGER_HAS_AUTH) || false,
   },
-  db: {
-    database: process.env.DB_NAME || 'kosmos-backend-api',
-    username: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    dialect: (process.env.DB_TYPE || 'postgres') as Dialect,
-    storage: null,
-    logging: false,
-    timezone: 'utc', // IMPORTANT For correct timezone management with DB.
-  },
-
+  db: dbConfig,
   auth: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID || 'use your own credentials',

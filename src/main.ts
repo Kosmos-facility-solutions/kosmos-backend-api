@@ -93,7 +93,8 @@ async function bootstrap() {
   );
 
   app.enableShutdownHooks();
-  await app.listen(config.server.port);
-  logger.info(`Server started at port ${config.server.port}`);
+  const port = process.env.PORT || config.server.port;
+  await app.listen(port);
+  logger.info(`Server started at port ${port}`);
 }
 bootstrap();
