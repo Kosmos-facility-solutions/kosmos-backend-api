@@ -22,7 +22,8 @@
     "test:e2e:cov": "jest --config ./jest-e2e.config.ts --coverage",
     "test:e2e:watch": "jest --config ./jest-e2e.config.ts --watch",
     "makemigration": "nest build && node --require source-map-support/register dist/libraries/migrations/makemigration.js",
-    "migrate": "nest build && node --require source-map-support/register dist/libraries/migrations/migrate.js",
+    "migrate:local": "nest build && node --require source-map-support/register dist/libraries/migrations/migrate.js",
+    "migrate": "node dist/libraries/migrations/migrate.js",
     "seed": "nest build && node --require source-map-support/register dist/core/database/seed.js",
     "live:seed": "node dist/core/database/seed.js",
     "live:migrate": " node dist/libraries/migrations/migrate.js",
@@ -30,7 +31,6 @@
     "commit": "commit"
   },
   "dependencies": {
-    
     "@faker-js/faker": "^8.4.1",
     "@nestjs/common": "^10.0.4",
     "@nestjs/core": "^10.0.0",
@@ -40,8 +40,6 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/sequelize": "^10.0.0",
     "@nestjs/swagger": "^7.2.0",
-    
-    
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
@@ -54,7 +52,6 @@
     "helmet": "^7.1.0",
     "morgan": "^1.10.0",
     "nest-winston": "^1.9.4",
-    
     "nodemailer": "^6.9.11",
     "object-hash": "^3.0.0",
     "passport-google-oauth20": "^2.0.0",
@@ -90,7 +87,6 @@
     "@types/nodemailer": "^6.4.14",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
-    
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
