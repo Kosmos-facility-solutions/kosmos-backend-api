@@ -1,0 +1,106 @@
+services:
+  - type: web
+    name: kosmos-backend-api
+    runtime: docker
+    region: oregon
+    plan: free
+    branch: main
+    healthCheckPath: /
+    envVars:
+      # APP
+      - key: NODE_ENV
+        value: production
+
+      - key: APP_NAME
+        value: kosmos-backend-api
+
+      - key: LOG_LEVEL
+        value: http
+
+      - key: LOG_TO_FILES
+        value: false
+
+      # NO incluir SERVER_PORT ni env - Render usa PORT automáticamente
+
+      # URL (se actualizan después del primer deploy)
+      - key: API_URL
+        value: https://kosmos-backend-api.onrender.com
+
+      - key: URLS_PROTOCOL
+        value: https
+
+      - key: URLS_URL
+        value: kosmos-backend-api.onrender.com
+
+      - key: URLS_PORT
+        value: ''
+
+      - key: URLS_API_ROOT
+        value: /api
+
+      # JWT - IMPORTANTE: Cambiar por un secret seguro
+      - key: JWT_SECRET
+        generateValue: true # Render genera automáticamente
+
+      - key: JWT_EXPIRY_HOURS
+        value: 48
+
+      # Swagger
+      - key: SWAGGER_ROUTE
+        value: swagger
+
+      - key: SWAGGER_USERNAME
+        value: admin
+
+      - key: SWAGGER_PASSWORD
+        sync: false # Añadir manualmente en dashboard (más seguro)
+
+      - key: SWAGGER_HAS_AUTH
+        value: true
+
+      # Database - Render la conecta automáticamente
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kosmos-db
+          property: connectionString
+
+      # Email - Configurar según tu proveedor
+      - key: EMAIL_FROM_ADDRESS
+        value: noreply@kosmos.com
+
+      - key: EMAIL_SMTP_HOST
+        value: smtp.gmail.com # Cambiar según tu proveedor
+
+      - key: EMAIL_SMPT_PORT
+        value: 587
+
+      - key: EMAIL_SMTP_SECURE
+        value: false
+
+      - key: EMAIL_SMTP_USER
+        sync: false # Añadir manualmente
+
+      - key: EMAIL_SMTP_PASS
+        sync: false # Añadir manualmente
+
+      # Google OAuth (opcional - si usas login con Google)
+      - key: GOOGLE_CLIENT_ID
+        sync: false # Añadir manualmente si lo usas
+
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false # Añadir manualmente si lo usas
+
+      # OAuth Redirects - Actualizar con tu frontend
+      - key: OAUTH_SUCCESSFUL_REDIRECT
+        value: https://tu-frontend.com/oauth/
+
+      - key: OAUTH_FAIL_REDIRECT
+        value: https://tu-frontend.com/
+
+databases:
+  - name: kosmos-db
+    databaseName: kosmos_backend_api
+    user: kosmos_user
+    region: oregon
+    plan: free
+    ipAllowList: [] # Permite conexiones desde cualquier lugar
