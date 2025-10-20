@@ -18,4 +18,5 @@ COPY --from=build /app/src/core/database/migrations ./src/core/database/migratio
 
 EXPOSE 10000
 
+#run migrations
 CMD ["sh", "-c", "npm run migrate && npm run seed && node dist/main.js"]
