@@ -12,3 +12,4 @@ import { ServiceRequestService } from './serviceRequest.service';
   exports: [SequelizeModule, ServiceRequestService, ServiceRequestRepository],
 })
 export class ServiceRequestModule {}
+//correct version
