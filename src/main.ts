@@ -9,6 +9,7 @@ import { AppModule } from './app.module';
 import { config } from './config';
 import { Logger } from './core/logger/Logger';
 
+//MAIN
 async function bootstrap() {
   const logger: Logger = new Logger();
   const app = await NestFactory.create(AppModule, {
