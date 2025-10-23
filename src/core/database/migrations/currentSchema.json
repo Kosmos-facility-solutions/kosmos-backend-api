@@ -291,6 +291,339 @@
       },
       "indexes": []
     },
+    "service_report": {
+      "tableName": "service_report",
+      "schema": {
+        "id": {
+          "autoIncrement": true,
+          "allowNull": true,
+          "primaryKey": true,
+          "field": "id",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "serviceRequestId": {
+          "allowNull": false,
+          "unique": true,
+          "field": "serviceRequestId",
+          "name": "serviceRequestId",
+          "references": {
+            "model": "service_request",
+            "key": "id"
+          },
+          "onDelete": "NO ACTION",
+          "onUpdate": "CASCADE",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "staffId": {
+          "allowNull": false,
+          "field": "staffId",
+          "name": "staffId",
+          "references": {
+            "model": "user",
+            "key": "id"
+          },
+          "onDelete": "NO ACTION",
+          "onUpdate": "CASCADE",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "status": {
+          "allowNull": false,
+          "defaultValue": {
+            "value": "draft"
+          },
+          "field": "status",
+          "seqType": "Sequelize.ENUM('draft', 'submitted', 'reviewed', 'approved')"
+        },
+        "rating": {
+          "allowNull": true,
+          "validate": {
+            "min": 1,
+            "max": 5
+          },
+          "field": "rating",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "comments": {
+          "allowNull": true,
+          "field": "comments",
+          "seqType": "Sequelize.TEXT"
+        },
+        "beforePhotos": {
+          "allowNull": true,
+          "field": "beforePhotos",
+          "seqType": "Sequelize.JSON"
+        },
+        "afterPhotos": {
+          "allowNull": true,
+          "field": "afterPhotos",
+          "seqType": "Sequelize.JSON"
+        },
+        "additionalPhotos": {
+          "allowNull": true,
+          "field": "additionalPhotos",
+          "seqType": "Sequelize.JSON"
+        },
+        "completedTasks": {
+          "allowNull": true,
+          "field": "completedTasks",
+          "seqType": "Sequelize.JSON"
+        },
+        "issuesFound": {
+          "allowNull": true,
+          "field": "issuesFound",
+          "seqType": "Sequelize.JSON"
+        },
+        "timeSpentMinutes": {
+          "allowNull": true,
+          "field": "timeSpentMinutes",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "startTime": {
+          "allowNull": true,
+          "field": "startTime",
+          "seqType": "Sequelize.TIME"
+        },
+        "endTime": {
+          "allowNull": true,
+          "field": "endTime",
+          "seqType": "Sequelize.TIME"
+        },
+        "productsUsed": {
+          "allowNull": true,
+          "field": "productsUsed",
+          "seqType": "Sequelize.JSON"
+        },
+        "equipmentUsed": {
+          "allowNull": true,
+          "field": "equipmentUsed",
+          "seqType": "Sequelize.JSON"
+        },
+        "customerFeedback": {
+          "allowNull": true,
+          "field": "customerFeedback",
+          "seqType": "Sequelize.TEXT"
+        },
+        "customerRating": {
+          "allowNull": true,
+          "validate": {
+            "min": 1,
+            "max": 5
+          },
+          "field": "customerRating",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "customerWouldRecommend": {
+          "allowNull": false,
+          "defaultValue": {
+            "value": false
+          },
+          "field": "customerWouldRecommend",
+          "seqType": "Sequelize.BOOLEAN"
+        },
+        "staffNotes": {
+          "allowNull": true,
+          "field": "staffNotes",
+          "seqType": "Sequelize.TEXT"
+        },
+        "requiresFollowUp": {
+          "allowNull": false,
+          "defaultValue": {
+            "value": false
+          },
+          "field": "requiresFollowUp",
+          "seqType": "Sequelize.BOOLEAN"
+        },
+        "followUpReason": {
+          "allowNull": true,
+          "field": "followUpReason",
+          "seqType": "Sequelize.TEXT"
+        },
+        "submittedAt": {
+          "allowNull": true,
+          "field": "submittedAt",
+          "seqType": "Sequelize.DATEONLY"
+        },
+        "reviewedAt": {
+          "allowNull": true,
+          "field": "reviewedAt",
+          "seqType": "Sequelize.DATEONLY"
+        },
+        "reviewedBy": {
+          "allowNull": true,
+          "field": "reviewedBy",
+          "name": "reviewedBy",
+          "references": {
+            "model": "user",
+            "key": "id"
+          },
+          "onDelete": "SET NULL",
+          "onUpdate": "CASCADE",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "createdAt": {
+          "allowNull": false,
+          "field": "createdAt",
+          "seqType": "Sequelize.DATE"
+        },
+        "updatedAt": {
+          "allowNull": false,
+          "field": "updatedAt",
+          "seqType": "Sequelize.DATE"
+        }
+      },
+      "indexes": []
+    },
+    "service_request": {
+      "tableName": "service_request",
+      "schema": {
+        "id": {
+          "autoIncrement": true,
+          "allowNull": true,
+          "primaryKey": true,
+          "field": "id",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "userId": {
+          "allowNull": false,
+          "field": "userId",
+          "name": "userId",
+          "references": {
+            "model": "user",
+            "key": "id"
+          },
+          "onDelete": "NO ACTION",
+          "onUpdate": "CASCADE",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "propertyId": {
+          "allowNull": false,
+          "field": "propertyId",
+          "name": "propertyId",
+          "references": {
+            "model": "property",
+            "key": "id"
+          },
+          "onDelete": "NO ACTION",
+          "onUpdate": "CASCADE",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "serviceId": {
+          "allowNull": false,
+          "field": "serviceId",
+          "name": "serviceId",
+          "references": {
+            "model": "service",
+            "key": "id"
+          },
+          "onDelete": "NO ACTION",
+          "onUpdate": "CASCADE",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "status": {
+          "allowNull": false,
+          "defaultValue": {
+            "value": "pending"
+          },
+          "field": "status",
+          "seqType": "Sequelize.ENUM('pending', 'scheduled', 'in_progress', 'completed', 'cancelled')"
+        },
+        "priority": {
+          "allowNull": false,
+          "defaultValue": {
+            "value": "normal"
+          },
+          "field": "priority",
+          "seqType": "Sequelize.ENUM('low', 'normal', 'high', 'urgent')"
+        },
+        "scheduledDate": {
+          "allowNull": false,
+          "field": "scheduledDate",
+          "seqType": "Sequelize.DATEONLY"
+        },
+        "scheduledTime": {
+          "allowNull": false,
+          "field": "scheduledTime",
+          "seqType": "Sequelize.TIME"
+        },
+        "completedDate": {
+          "allowNull": true,
+          "field": "completedDate",
+          "seqType": "Sequelize.DATEONLY"
+        },
+        "estimatedPrice": {
+          "allowNull": false,
+          "field": "estimatedPrice",
+          "seqType": "Sequelize.DECIMAL(10, 2)"
+        },
+        "actualPrice": {
+          "allowNull": true,
+          "field": "actualPrice",
+          "seqType": "Sequelize.DECIMAL(10, 2)"
+        },
+        "notes": {
+          "allowNull": true,
+          "field": "notes",
+          "seqType": "Sequelize.TEXT"
+        },
+        "specialInstructions": {
+          "allowNull": true,
+          "field": "specialInstructions",
+          "seqType": "Sequelize.TEXT"
+        },
+        "cancellationReason": {
+          "allowNull": true,
+          "field": "cancellationReason",
+          "seqType": "Sequelize.TEXT"
+        },
+        "recurrenceFrequency": {
+          "allowNull": false,
+          "defaultValue": {
+            "value": "one_time"
+          },
+          "field": "recurrenceFrequency",
+          "seqType": "Sequelize.ENUM('one_time', 'daily', 'weekly', 'bi_weekly', 'monthly', 'quarterly')"
+        },
+        "isRecurring": {
+          "allowNull": false,
+          "defaultValue": {
+            "value": false
+          },
+          "field": "isRecurring",
+          "seqType": "Sequelize.BOOLEAN"
+        },
+        "recurrenceEndDate": {
+          "allowNull": true,
+          "field": "recurrenceEndDate",
+          "seqType": "Sequelize.DATEONLY"
+        },
+        "estimatedDurationMinutes": {
+          "allowNull": true,
+          "field": "estimatedDurationMinutes",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "actualDurationMinutes": {
+          "allowNull": true,
+          "field": "actualDurationMinutes",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "additionalServices": {
+          "allowNull": true,
+          "field": "additionalServices",
+          "seqType": "Sequelize.JSON"
+        },
+        "createdAt": {
+          "allowNull": false,
+          "field": "createdAt",
+          "seqType": "Sequelize.DATE"
+        },
+        "updatedAt": {
+          "allowNull": false,
+          "field": "updatedAt",
+          "seqType": "Sequelize.DATE"
+        }
+      },
+      "indexes": []
+    },
     "user": {
       "tableName": "user",
       "schema": {
@@ -422,5 +755,5 @@
       "indexes": []
     }
   },
-  "revision": "20251017144200"
+  "revision": "20251023140026"
 }
