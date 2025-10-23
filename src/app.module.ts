@@ -2,7 +2,7 @@ import { EmailModule } from '@modules/email/email.module';
 import { PropertyModule } from '@modules/property/property.module';
 import { ServiceModule } from '@modules/service/service.module';
 import { ServiceReportModule } from '@modules/serviceReport/serviceReport.module';
-import { ServiceRequestModule } from '@modules/serviceRequest/servicerequest.module';
+import { ServiceRequestModule } from '@modules/serviceRequest/serviceRequest.module';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
