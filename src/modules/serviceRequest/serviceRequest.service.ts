@@ -3,6 +3,7 @@ import { Logger } from '@core/logger/Logger';
 import { ArrayWhereOptions } from '@libraries/baseModel.entity';
 import { PropertyRepository } from '@modules/property/property.repository';
 import { PropertyService } from '@modules/property/property.service';
+import { User } from '@modules/user/entities/user.entity';
 import { UserRepository } from '@modules/user/user.repository';
 import { UserService } from '@modules/user/user.service';
 import {
@@ -80,10 +81,11 @@ export class ServiceRequestService {
       transaction = await this.sequelize.transaction();
 
       // 1. Check if user already exists
-      let user = await this.userRepository.findOneByEmail(
-        createServiceRequestDto.user.email,
-        transaction,
-      );
+      let user = await User.findOne({
+        where: {
+          email: createServiceRequestDto.user.email,
+        },
+      });
 
       if (!user) {
         // Create new user with a temporary password
