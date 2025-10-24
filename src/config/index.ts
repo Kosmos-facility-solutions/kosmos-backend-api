@@ -63,7 +63,7 @@ export const config = {
     from_address:
       process.env.EMAIL_FROM_ADDRESS || 'MyApp <no-reply@example.com>',
     host: process.env.EMAIL_SMTP_HOST || 'smtp.gmail.com',
-    port: process.env.EMAIL_SMPT_PORT
+    port: process.env.EMAIL_SMTP_PORT
       ? parseInt(process.env.EMAIL_SMPT_PORT)
       : 587,
     secure: process.env.EMAIL_SMTP_SECURE
