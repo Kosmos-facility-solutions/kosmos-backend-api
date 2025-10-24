@@ -1,0 +1,149 @@
+<!-- BEGIN BODY // -->
+<table border="0" cellpadding="0" cellspacing="0" width="600" id="templateBody" style="background-color: #f4f4f4;">
+  <tr>
+    <td valign="top" class="bodyContainer">
+      <!-- Header with Logo -->
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #2c3e50; padding: 30px 0;">
+        <tr>
+          <td align="center">
+            <h1 style="color: #ffffff; font-family: Arial, sans-serif; font-size: 28px; margin: 0; font-weight: 300;">
+              <span style="color: #FF6B35; font-weight: bold;">KOSMOS</span> FACILITY SOLUTIONS
+            </h1>
+            <p style="color: #95a5a6; font-family: Arial, sans-serif; font-size: 14px; margin: 10px 0 0 0; font-style: italic;">
+              We clean it like it's our own house.
+            </p>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Main Content -->
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #ffffff; padding: 40px 30px;">
+        <tr>
+          <td>
+            <h2 style="color: #2c3e50; font-family: Arial, sans-serif; font-size: 24px; margin: 0 0 20px 0; font-weight: 600;">
+              Service Request Received! ✓
+            </h2>
+            
+            <div style="background: #FF6B35; height: 3px; width: 60px; margin: 0 0 25px 0;"></div>
+            
+            <p style="color: #555555; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+              Hi <strong><%= customerName %></strong>,
+            </p>
+            
+            <p style="color: #555555; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; margin: 0 0 25px 0;">
+              Thank you for choosing Kosmos Facility Solutions! We've received your service request and our team is currently reviewing it. You'll receive a confirmation email once your request has been evaluated and approved.
+            </p>
+
+            <!-- Service Details Box -->
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8f9fa; border-left: 4px solid #FF6B35; margin: 0 0 25px 0;">
+              <tr>
+                <td style="padding: 25px;">
+                  <h3 style="color: #2c3e50; font-family: Arial, sans-serif; font-size: 18px; margin: 0 0 15px 0; font-weight: 600;">
+                    Request Details
+                  </h3>
+                  
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                      <td style="padding: 8px 0; color: #777777; font-family: Arial, sans-serif; font-size: 14px; width: 40%;">
+                        <strong>Request Number:</strong>
+                      </td>
+                      <td style="padding: 8px 0; color: #2c3e50; font-family: Arial, sans-serif; font-size: 14px;">
+                        #<%= requestId %>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #777777; font-family: Arial, sans-serif; font-size: 14px;">
+                        <strong>Service:</strong>
+                      </td>
+                      <td style="padding: 8px 0; color: #2c3e50; font-family: Arial, sans-serif; font-size: 14px;">
+                        <%= serviceName %>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #777777; font-family: Arial, sans-serif; font-size: 14px;">
+                        <strong>Property:</strong>
+                      </td>
+                      <td style="padding: 8px 0; color: #2c3e50; font-family: Arial, sans-serif; font-size: 14px;">
+                        <%= propertyName %>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #777777; font-family: Arial, sans-serif; font-size: 14px;">
+                        <strong>Scheduled Date:</strong>
+                      </td>
+                      <td style="padding: 8px 0; color: #2c3e50; font-family: Arial, sans-serif; font-size: 14px;">
+                        <%= scheduledDate %> at <%= scheduledTime %>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #777777; font-family: Arial, sans-serif; font-size: 14px;">
+                        <strong>Estimated Price:</strong>
+                      </td>
+                      <td style="padding: 8px 0; color: #2c3e50; font-family: Arial, sans-serif; font-size: 14px;">
+                        $<%= estimatedPrice %>
+                      </td>
+                    </tr>
+                    <% if (isRecurring) { %>
+                    <tr>
+                      <td style="padding: 8px 0; color: #777777; font-family: Arial, sans-serif; font-size: 14px;">
+                        <strong>Recurring Service:</strong>
+                      </td>
+                      <td style="padding: 8px 0; color: #2c3e50; font-family: Arial, sans-serif; font-size: 14px;">
+                        <%= recurrenceFrequency %>
+                      </td>
+                    </tr>
+                    <% } %>
+                  </table>
+                  
+                  <% if (notes) { %>
+                  <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6;">
+                    <p style="color: #777777; font-family: Arial, sans-serif; font-size: 13px; margin: 0 0 5px 0;">
+                      <strong>Notes:</strong>
+                    </p>
+                    <p style="color: #555555; font-family: Arial, sans-serif; font-size: 14px; margin: 0;">
+                      <%= notes %>
+                    </p>
+                  </div>
+                  <% } %>
+                </td>
+              </tr>
+            </table>
+
+            <!-- What's Next Section -->
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #fff3e6; border-radius: 8px; margin: 0 0 25px 0;">
+              <tr>
+                <td style="padding: 20px;">
+                  <h4 style="color: #2c3e50; font-family: Arial, sans-serif; font-size: 16px; margin: 0 0 10px 0; font-weight: 600;">
+                    ⏱️ What's Next?
+                  </h4>
+                  <p style="color: #555555; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; margin: 0;">
+                    Our team will review your request within <strong>24 hours</strong>. Once approved, you'll receive a confirmation email with detailed scheduling information.
+                  </p>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Contact Info -->
+            <p style="color: #777777; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; margin: 0;">
+              If you have any questions, feel free to contact us. We're here to help!
+            </p>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Footer -->
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #2c3e50; padding: 25px 30px;">
+        <tr>
+          <td align="center">
+            <p style="color: #95a5a6; font-family: Arial, sans-serif; font-size: 13px; margin: 0 0 10px 0;">
+              Thank you for trusting Kosmos Facility Solutions
+            </p>
+            <p style="color: #7f8c8d; font-family: Arial, sans-serif; font-size: 12px; margin: 0;">
+              © <%= new Date().getFullYear() %> Kosmos Facility Solutions. All rights reserved.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>

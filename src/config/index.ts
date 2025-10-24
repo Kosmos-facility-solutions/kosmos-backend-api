@@ -37,6 +37,7 @@ export const config = {
   app: {
     name: process.env.APP_NAME || 'FLUG-NEST',
   },
+  adminEmail: process.env.ADMIN_EMAIL || 'your-admin-email',
   root: path.normalize(`${__dirname}/..`),
 
   env: process.env.NODE_ENV || 'development',

@@ -1,0 +1,216 @@
+<!-- BEGIN BODY // -->
+<table border="0" cellpadding="0" cellspacing="0" width="600" id="templateBody" style="background-color: #f4f4f4;">
+  <tr>
+    <td valign="top" class="bodyContainer">
+      <!-- Header with Logo -->
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #2c3e50; padding: 30px 0;">
+        <tr>
+          <td align="center">
+            <h1 style="color: #ffffff; font-family: Arial, sans-serif; font-size: 28px; margin: 0; font-weight: 300;">
+              <span style="color: #FF6B35; font-weight: bold;">KOSMOS</span> FACILITY SOLUTIONS
+            </h1>
+            <p style="color: #95a5a6; font-family: Arial, sans-serif; font-size: 14px; margin: 10px 0 0 0; font-style: italic;">
+              We clean it like it's our own house.
+            </p>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Main Content -->
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #ffffff; padding: 40px 30px;">
+        <tr>
+          <td>
+            <!-- Success Badge -->
+            <table border="0" cellpadding="0" cellspacing="0" style="margin: 0 0 20px 0;">
+              <tr>
+                <td align="center">
+                  <div style="background-color: #d4edda; color: #155724; font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; padding: 12px 20px; border-radius: 25px; border: 2px solid #28a745; display: inline-block;">
+                    ✓ SERVICE REQUEST APPROVED
+                  </div>
+                </td>
+              </tr>
+            </table>
+
+            <h2 style="color: #2c3e50; font-family: Arial, sans-serif; font-size: 24px; margin: 0 0 20px 0; font-weight: 600; text-align: center;">
+              Welcome to Kosmos! 🎉
+            </h2>
+            
+            <div style="background: #27ae60; height: 3px; width: 60px; margin: 0 auto 25px auto;"></div>
+            
+            <p style="color: #555555; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+              Hi <strong><%= customerName %></strong>,
+            </p>
+            
+            <p style="color: #555555; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; margin: 0 0 25px 0;">
+              Great news! Your service request has been <strong>approved and confirmed</strong>. We're excited to serve you!
+            </p>
+
+            <!-- Account Created Box -->
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; margin: 0 0 25px 0; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+              <tr>
+                <td style="padding: 30px;">
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                      <td align="center">
+                        <div style="background-color: rgba(255, 255, 255, 0.2); border-radius: 50%; width: 60px; height: 60px; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center;">
+                          <span style="font-size: 32px;">🔑</span>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="center">
+                        <h3 style="color: #ffffff; font-family: Arial, sans-serif; font-size: 20px; margin: 0 0 15px 0; font-weight: 600;">
+                          Your Account Has Been Created!
+                        </h3>
+                        <p style="color: #ffffff; font-family: Arial, sans-serif; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0; opacity: 0.95;">
+                          We've created a customer account for you to track your services, view reports, and manage your bookings.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Credentials Box -->
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: rgba(255, 255, 255, 0.15); border-radius: 8px; margin: 0 0 20px 0;">
+                    <tr>
+                      <td style="padding: 20px;">
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                          <tr>
+                            <td style="padding: 8px 0; color: rgba(255, 255, 255, 0.8); font-family: Arial, sans-serif; font-size: 14px; width: 35%;">
+                              <strong>Email:</strong>
+                            </td>
+                            <td style="padding: 8px 0; color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; font-weight: 600;">
+                              <%= customerEmail %>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 8px 0; color: rgba(255, 255, 255, 0.8); font-family: Arial, sans-serif; font-size: 14px;">
+                              <strong>Temporary Password:</strong>
+                            </td>
+                            <td style="padding: 8px 0; color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; font-weight: 600;">
+                              <%= temporaryPassword %>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Login Button -->
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                      <td align="center">
+                        <a href="<%= loginUrl %>" style="background-color: #ffffff; color: #667eea; font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; text-decoration: none; padding: 14px 35px; border-radius: 6px; display: inline-block; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);">
+                          Login to Your Account →
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <p style="color: rgba(255, 255, 255, 0.9); font-family: Arial, sans-serif; font-size: 13px; text-align: center; margin: 15px 0 0 0;">
+                    ⚠️ Please change your password after your first login
+                  </p>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Service Details Box -->
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8f9fa; border-left: 4px solid #27ae60; margin: 0 0 25px 0;">
+              <tr>
+                <td style="padding: 25px;">
+                  <h3 style="color: #2c3e50; font-family: Arial, sans-serif; font-size: 18px; margin: 0 0 15px 0; font-weight: 600;">
+                    📋 Confirmed Service Details
+                  </h3>
+                  
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                      <td style="padding: 8px 0; color: #777777; font-family: Arial, sans-serif; font-size: 14px; width: 40%;">
+                        <strong>Service:</strong>
+                      </td>
+                      <td style="padding: 8px 0; color: #2c3e50; font-family: Arial, sans-serif; font-size: 14px;">
+                        <%= serviceName %>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #777777; font-family: Arial, sans-serif; font-size: 14px;">
+                        <strong>Property:</strong>
+                      </td>
+                      <td style="padding: 8px 0; color: #2c3e50; font-family: Arial, sans-serif; font-size: 14px;">
+                        <%= propertyName %>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #777777; font-family: Arial, sans-serif; font-size: 14px;">
+                        <strong>Scheduled Date:</strong>
+                      </td>
+                      <td style="padding: 8px 0; font-family: Arial, sans-serif; font-size: 14px;">
+                        <span style="color: #27ae60; font-weight: bold;"><%= scheduledDate %> at <%= scheduledTime %></span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #777777; font-family: Arial, sans-serif; font-size: 14px;">
+                        <strong>Confirmed Price:</strong>
+                      </td>
+                      <td style="padding: 8px 0; font-family: Arial, sans-serif; font-size: 16px;">
+                        <span style="color: #27ae60; font-weight: bold;">$<%= confirmedPrice %></span>
+                      </td>
+                    </tr>
+                    <% if (isRecurring) { %>
+                    <tr>
+                      <td style="padding: 8px 0; color: #777777; font-family: Arial, sans-serif; font-size: 14px;">
+                        <strong>Recurring Service:</strong>
+                      </td>
+                      <td style="padding: 8px 0; color: #2c3e50; font-family: Arial, sans-serif; font-size: 14px;">
+                        <%= recurrenceFrequency %>
+                      </td>
+                    </tr>
+                    <% } %>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <!-- What's Next Section -->
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #e8f4f8; border-radius: 8px; margin: 0 0 25px 0;">
+              <tr>
+                <td style="padding: 20px;">
+                  <h4 style="color: #2c3e50; font-family: Arial, sans-serif; font-size: 16px; margin: 0 0 12px 0; font-weight: 600;">
+                    📱 What You Can Do Now:
+                  </h4>
+                  <ul style="color: #555555; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
+                    <li>Log in to your customer portal</li>
+                    <li>View your upcoming service schedule</li>
+                    <li>Track service reports in real-time</li>
+                    <li>Manage your properties and services</li>
+                    <li>Review past services and invoices</li>
+                  </ul>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Contact Info -->
+            <p style="color: #777777; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; margin: 0 0 10px 0; text-align: center;">
+              Questions? We're here to help!
+            </p>
+            <p style="color: #777777; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; margin: 0; text-align: center;">
+              Contact us anytime at <a href="mailto:support@kosmosfs.com" style="color: #FF6B35; text-decoration: none;">support@kosmosfs.com</a>
+            </p>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Footer -->
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #2c3e50; padding: 25px 30px;">
+        <tr>
+          <td align="center">
+            <p style="color: #95a5a6; font-family: Arial, sans-serif; font-size: 13px; margin: 0 0 10px 0;">
+              Thank you for choosing Kosmos Facility Solutions
+            </p>
+            <p style="color: #7f8c8d; font-family: Arial, sans-serif; font-size: 12px; margin: 0;">
+              © <%= new Date().getFullYear() %> Kosmos Facility Solutions. All rights reserved.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>

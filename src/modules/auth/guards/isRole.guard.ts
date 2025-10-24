@@ -1,5 +1,5 @@
 import { Logger } from '@core/logger/Logger';
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import _ from 'lodash';

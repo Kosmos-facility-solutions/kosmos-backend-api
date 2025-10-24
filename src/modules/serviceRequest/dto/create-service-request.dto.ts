@@ -1,9 +1,7 @@
 import { ApiHideProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
-  IsDateString,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -40,9 +38,8 @@ export class CreateServiceRequestDto {
   priority?: ServiceRequestPriority;
 
   @IsNotEmpty()
-  @IsDateString()
-  @Transform(({ value }) => new Date(value), { toClassOnly: true })
-  scheduledDate: Date;
+  @IsString()
+  scheduledDate: string; // ✅ Cambiado a string
 
   @IsNotEmpty()
   @IsString()
@@ -70,11 +67,8 @@ export class CreateServiceRequestDto {
   recurrenceFrequency?: RecurrenceFrequency;
 
   @IsOptional()
-  @IsDateString()
-  @Transform(({ value }) => (value ? new Date(value) : null), {
-    toClassOnly: true,
-  })
-  recurrenceEndDate?: Date;
+  @IsString()
+  recurrenceEndDate?: string | null; // ✅ Cambiado a string
 
   @IsOptional()
   @IsNumber()

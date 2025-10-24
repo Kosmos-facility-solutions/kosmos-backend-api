@@ -18,6 +18,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
 } from '@nestjs/common';
 import { ApiExtraModels, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ParseAttributesPipe } from '@pipes/parseAttributes.pipe';
@@ -35,6 +36,7 @@ import { ApiQueryWhere } from '@swagger/parameters/where.decorator';
 import { ApiCommonResponses } from '@swagger/utils/commonResponses.decorator';
 import { ApiQueryPagination } from '@swagger/utils/pagination.decorator';
 import { IncludeOptions, OrderItem } from 'sequelize';
+import { ApproveServiceRequestDto } from './dto/approved-service-request.dto';
 import { CancelServiceRequestDto } from './dto/cancel-service-request.dto';
 import { CreateServiceRequestDto } from './dto/create-service-request.dto';
 import { UpdateServiceRequestDto } from './dto/update-service-request.dto';
@@ -58,6 +60,25 @@ export class ServiceRequestController {
   @Post()
   async create(@Body() createServiceRequestDto: CreateServiceRequestDto) {
     return await this.serviceRequestService.create(createServiceRequestDto);
+  }
+
+  @ApiOperation({ summary: 'Approve Service Request (Admin only)' })
+  @ApiCommonResponses()
+  @ApiOkResponseData(ServiceRequest)
+  @IsRole(ROLES.ADMIN)
+  @ValidateJWT()
+  @Patch(':id/approve')
+  async approve(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() approveDto: ApproveServiceRequestDto,
+    @Req() req: Request & { user?: any },
+  ) {
+    const currentUserId = req.user.id;
+    return await this.serviceRequestService.approve(
+      +id,
+      approveDto,
+      currentUserId,
+    );
   }
 
   @ApiOperation({ summary: 'Get all Service Request entries' })

@@ -87,7 +87,7 @@ export class AuthService {
   public async signUp(createUserDto: CreateUserDto) {
     const user = await this.createUser(createUserDto);
     const token = await this.createToken(user, TOKEN_TYPE.CONFIRM);
-    //await this.emailService.sendConfirmationEmail(user, token.token);
+    await this.emailService.sendConfirmationEmail(user, token.token);
     return UserResponseDto.fromUser(user);
   }
 
