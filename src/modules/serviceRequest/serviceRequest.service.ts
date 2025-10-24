@@ -1,6 +1,8 @@
 import { PaginatedDto } from '@common/dto/paginated.dto';
 import { Logger } from '@core/logger/Logger';
 import { ArrayWhereOptions } from '@libraries/baseModel.entity';
+import { PropertyRepository } from '@modules/property/property.repository';
+import { PropertyService } from '@modules/property/property.service';
 import { UserRepository } from '@modules/user/user.repository';
 import { UserService } from '@modules/user/user.service';
 import {
@@ -8,11 +10,15 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { IncludeOptions, OrderItem } from 'sequelize';
+import { IncludeOptions, OrderItem, Transaction } from 'sequelize';
+import { Sequelize } from 'sequelize-typescript';
 import { MailingService } from '../email/email.service';
 import { ApproveServiceRequestDto } from './dto/approved-service-request.dto';
 import { CancelServiceRequestDto } from './dto/cancel-service-request.dto';
-import { CreateServiceRequestDto } from './dto/create-service-request.dto';
+import {
+  CreateServiceRequestDemoQuoteDto,
+  CreateServiceRequestDto,
+} from './dto/create-service-request.dto';
 import { UpdateServiceRequestDto } from './dto/update-service-request.dto';
 import {
   ServiceRequest,
@@ -28,6 +34,9 @@ export class ServiceRequestService {
     private mailingService: MailingService,
     private userRepository: UserRepository,
     private userService: UserService,
+    private propertyService: PropertyService,
+    private propertyRepository: PropertyRepository,
+    private sequelize: Sequelize, // For transactions
   ) {}
 
   async create(createServiceRequestDto: CreateServiceRequestDto) {
@@ -54,6 +63,115 @@ export class ServiceRequestService {
       fullServiceRequest,
     );
     return serviceRequest;
+  }
+
+  /**
+   * Create a demo quote request (public endpoint - no authentication required)
+   * This creates: User -> Property -> Service Request
+   * And sends emails to both customer and admin
+   */
+  async createDemoQuote(
+    createServiceRequestDto: CreateServiceRequestDemoQuoteDto,
+  ) {
+    let transaction: Transaction;
+
+    try {
+      // Start transaction
+      transaction = await this.sequelize.transaction();
+
+      // 1. Check if user already exists
+      let user = await this.userRepository.findOneByEmail(
+        createServiceRequestDto.user.email,
+        transaction,
+      );
+
+      if (!user) {
+        // Create new user with a temporary password
+        const temporaryPassword = this.generateTemporaryPassword();
+
+        user = await this.userRepository.create(
+          {
+            ...createServiceRequestDto.user,
+            password: temporaryPassword,
+          },
+          transaction, // Pass transaction if your service supports it
+        );
+
+        this.logger.log(`New user created: ${user.email}`);
+      } else {
+        this.logger.log(`Existing user found: ${user.email}`);
+      }
+
+      // 2. Create property linked to the user
+      createServiceRequestDto.property.userId = user.id;
+
+      const property = await this.propertyRepository.create(
+        createServiceRequestDto.property,
+        transaction,
+      );
+
+      this.logger.log(`Property created: ${property.name}`);
+
+      const serviceRequestData: any = {
+        userId: user.id,
+        propertyId: property.id,
+        serviceId: createServiceRequestDto.serviceId,
+        scheduledDate: new Date(createServiceRequestDto.scheduledDate),
+        scheduledTime: createServiceRequestDto.scheduledTime,
+        estimatedPrice: createServiceRequestDto.estimatedPrice,
+        status: ServiceRequestStatus.Pending, // Always start as pending for quotes
+        priority: createServiceRequestDto.priority,
+        notes: createServiceRequestDto.notes,
+        specialInstructions: createServiceRequestDto.specialInstructions,
+        isRecurring: createServiceRequestDto.isRecurring || false,
+        recurrenceFrequency: createServiceRequestDto.recurrenceFrequency,
+        recurrenceEndDate: createServiceRequestDto.recurrenceEndDate
+          ? new Date(createServiceRequestDto.recurrenceEndDate)
+          : null,
+        estimatedDurationMinutes:
+          createServiceRequestDto.estimatedDurationMinutes,
+        additionalServices: createServiceRequestDto.additionalServices,
+      };
+
+      // 4. Create service request
+      const serviceRequest = await this.serviceRequestRepository.create(
+        serviceRequestData,
+        transaction,
+      );
+
+      this.logger.log(`Service request created: #${serviceRequest.id}`);
+
+      // Commit transaction
+      await transaction.commit();
+
+      // 5. Fetch complete service request with relations
+      const fullServiceRequest =
+        await this.serviceRequestRepository.findOneById(serviceRequest.id, [
+          { association: 'user' },
+          { association: 'service' },
+          { association: 'property' },
+        ]);
+      await this.mailingService.sendServiceRequestAdminEmail(
+        fullServiceRequest,
+      );
+      await this.mailingService.sendServiceRequestCustomerEmail(
+        fullServiceRequest,
+      );
+
+      return {
+        success: true,
+        message: 'Quote request submitted successfully',
+        data: fullServiceRequest,
+        isNewUser: !user.id, // Indicates if a new account was created
+      };
+    } catch (error) {
+      // Rollback transaction if it exists
+      if (transaction) {
+        await transaction.rollback();
+      }
+      this.logger.error('Error creating demo quote:', error);
+      throw error;
+    }
   }
 
   async findAll(options?: {

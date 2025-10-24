@@ -38,7 +38,10 @@ import { ApiQueryPagination } from '@swagger/utils/pagination.decorator';
 import { IncludeOptions, OrderItem } from 'sequelize';
 import { ApproveServiceRequestDto } from './dto/approved-service-request.dto';
 import { CancelServiceRequestDto } from './dto/cancel-service-request.dto';
-import { CreateServiceRequestDto } from './dto/create-service-request.dto';
+import {
+  CreateServiceRequestDemoQuoteDto,
+  CreateServiceRequestDto,
+} from './dto/create-service-request.dto';
 import { UpdateServiceRequestDto } from './dto/update-service-request.dto';
 import {
   ServiceRequest,
@@ -60,6 +63,18 @@ export class ServiceRequestController {
   @Post()
   async create(@Body() createServiceRequestDto: CreateServiceRequestDto) {
     return await this.serviceRequestService.create(createServiceRequestDto);
+  }
+
+  @ApiOperation({ summary: 'Create a Service  for demo quotes without auth' })
+  @ApiCommonResponses()
+  @ApiCreatedResponseData(ServiceRequest)
+  @Post('/demo-quote')
+  async createDemoQuote(
+    @Body() createServiceRequestDemoQuoteDto: CreateServiceRequestDemoQuoteDto,
+  ) {
+    return await this.serviceRequestService.createDemoQuote(
+      createServiceRequestDemoQuoteDto,
+    );
   }
 
   @ApiOperation({ summary: 'Approve Service Request (Admin only)' })
