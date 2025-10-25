@@ -94,7 +94,7 @@ export class ServiceRequestService {
             ...createServiceRequestDto.user,
             password: temporaryPassword,
           },
-          transaction, // Pass transaction if your service supports it
+          transaction,
         );
 
         this.logger.log(`New user created: ${user.email}`);
@@ -165,12 +165,7 @@ export class ServiceRequestService {
         fullServiceRequest,
       );
 
-      return {
-        success: true,
-        message: 'Quote request submitted successfully',
-        data: fullServiceRequest,
-        isNewUser: !user.id, // Indicates if a new account was created
-      };
+      return serviceRequest;
     } catch (error) {
       // Rollback transaction if it exists
       if (transaction) {

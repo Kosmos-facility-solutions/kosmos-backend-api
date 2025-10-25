@@ -6,7 +6,9 @@ import { IJwtPayload } from '@modules/auth/auth.service';
 import { IsOwner } from '@modules/auth/decorators/isOwner.decorator';
 import { IsRole } from '@modules/auth/decorators/isRole.decorator';
 import { ValidateJWT } from '@modules/auth/decorators/validateJWT.decorator';
+import { CreatePropertyDto } from '@modules/property/dto/create-property.dto';
 import { ROLES } from '@modules/role/enums/roles.enum';
+import { CreateUserDto } from '@modules/user/dto/create-user.dto';
 import {
   Body,
   Controller,
@@ -47,7 +49,13 @@ import {
 } from './entities/serviceRequest.entity';
 import { ServiceRequestService } from './serviceRequest.service';
 
-@ApiExtraModels(ServiceRequest)
+@ApiExtraModels(
+  ServiceRequest,
+  CreateServiceRequestDto,
+  CreateServiceRequestDemoQuoteDto,
+  CreateUserDto,
+  CreatePropertyDto,
+)
 @ApiTags('service-requests')
 @Controller('service-requests')
 export class ServiceRequestController {
