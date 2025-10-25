@@ -1,3 +1,4 @@
+// src/modules/email/email.service.ts
 import { config } from '@config/index';
 import { Logger } from '@core/logger/Logger';
 import { Plain } from '@libraries/baseModel.entity';
@@ -7,49 +8,28 @@ import { ServiceRequest } from '@modules/serviceRequest/entities/serviceRequest.
 import { User } from '@modules/user/entities/user.entity';
 import { UserRepository } from '@modules/user/user.repository';
 import { UserRole } from '@modules/userrole/entities/userrole.entity';
-import { Injectable, OnApplicationShutdown } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { format } from 'date-fns';
 import ejs from 'ejs';
-import nodemailer from 'nodemailer';
 import path from 'path';
+import { EmailHttpService } from './email-http.service';
 
 @Injectable()
-export class MailingService implements OnApplicationShutdown {
-  private mailer: nodemailer.Transporter;
+export class MailingService {
   private logger: Logger = new Logger(MailingService.name);
 
   constructor(
     private userRepository: UserRepository,
     private roleRepository: RoleRepository,
-  ) {
-    this.mailer = nodemailer.createTransport({
-      pool: true,
-      host: config.email.host,
-      port: config.email.port,
-      auth: config.email.auth,
-      secure: config.email.secure,
-    });
-  }
-
-  onApplicationShutdown() {
-    this.close();
-  }
-
-  public async close() {
-    this.mailer.close();
-  }
+    private emailHttpService: EmailHttpService,
+  ) {}
 
   private async send(
     email: string,
     subject: string,
     html: string,
   ): Promise<any> {
-    return await this.mailer.sendMail({
-      from: config.email.from_address,
-      to: email,
-      subject: subject,
-      html: html,
-    });
+    return await this.emailHttpService.send(email, subject, html);
   }
 
   private compileTemplate(context: any): Promise<string> {
@@ -143,7 +123,6 @@ export class MailingService implements OnApplicationShutdown {
   /**
    * Send service request notification email to admins
    */
-
   private async getAdminEmails(): Promise<string[]> {
     const adminRole = await this.roleRepository.findOne({
       where: { name: ROLES.ADMIN },
@@ -178,7 +157,7 @@ export class MailingService implements OnApplicationShutdown {
       customerName:
         `${serviceRequest.user?.firstName || ''} ${serviceRequest.user?.lastName || ''}`.trim(),
       customerEmail: serviceRequest.user?.email || 'N/A',
-      customerPhone: '1-800-000-2343', //serviceRequest.user?.phone || null,
+      customerPhone: serviceRequest.user?.phone || 'N/A',
       requestId: serviceRequest.id,
       serviceName: serviceRequest.service?.name || 'Service',
       propertyName: serviceRequest.property?.name || 'Property',
