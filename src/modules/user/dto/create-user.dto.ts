@@ -1,8 +1,8 @@
-import { AuthType } from '../entities/user.entity';
 import {
   IsEmail,
   IsNotEmpty,
   IsOptional,
+  IsPhoneNumber,
   IsString,
   MaxLength,
   MinLength,
@@ -15,6 +15,12 @@ export class CreateUserDto {
   email: string;
 
   @IsNotEmpty()
+  @MaxLength(255)
+  @IsPhoneNumber()
+  phone: string;
+
+  //@IsNotEmpty()
+  @IsOptional() //Set as optional for the current user creation flow
   @MinLength(8)
   @IsString()
   password: string;

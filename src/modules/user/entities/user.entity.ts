@@ -1,3 +1,10 @@
+import { BaseModel } from '@libraries/baseModel.entity';
+import { FederatedCredential } from '@modules/auth/entities/federatedCredential.entity';
+import { Role } from '@modules/role/entities/role.entity';
+import { UserRole } from '@modules/userrole/entities/userrole.entity';
+import { ApiHideProperty } from '@nestjs/swagger';
+import bcrypt from 'bcrypt';
+import { Transaction } from 'sequelize';
 import {
   BeforeBulkCreate,
   BeforeBulkUpdate,
@@ -9,13 +16,6 @@ import {
   HasMany,
   Table,
 } from 'sequelize-typescript';
-import bcrypt from 'bcrypt';
-import { Role } from '@modules/role/entities/role.entity';
-import { UserRole } from '@modules/userrole/entities/userrole.entity';
-import { Transaction } from 'sequelize';
-import { BaseModel } from '@libraries/baseModel.entity';
-import { ApiHideProperty } from '@nestjs/swagger';
-import { FederatedCredential } from '@modules/auth/entities/federatedCredential.entity';
 export enum AuthType {
   Email = 'email',
   Microsoft = 'microsoft',
@@ -49,6 +49,18 @@ export class User extends BaseModel<User> {
     },
   })
   email: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  phone: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  additionalPhone: string;
 
   // If the user can access the platform
   @Column({

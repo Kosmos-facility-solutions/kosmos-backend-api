@@ -659,6 +659,16 @@
           "field": "email",
           "seqType": "Sequelize.STRING"
         },
+        "phone": {
+          "allowNull": true,
+          "field": "phone",
+          "seqType": "Sequelize.STRING"
+        },
+        "additionalPhone": {
+          "allowNull": true,
+          "field": "additionalPhone",
+          "seqType": "Sequelize.STRING"
+        },
         "isActive": {
           "allowNull": false,
           "defaultValue": {
@@ -755,5 +765,5 @@
       "indexes": []
     }
   },
-  "revision": "20251023140026"
+  "revision": "20251025132757"
 }

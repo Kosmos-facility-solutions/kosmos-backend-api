@@ -38,10 +38,8 @@ import { ApiQueryPagination } from '@swagger/utils/pagination.decorator';
 import { IncludeOptions, OrderItem } from 'sequelize';
 import { ApproveServiceRequestDto } from './dto/approved-service-request.dto';
 import { CancelServiceRequestDto } from './dto/cancel-service-request.dto';
-import {
-  CreateServiceRequestDemoQuoteDto,
-  CreateServiceRequestDto,
-} from './dto/create-service-request.dto';
+import { CreateServiceRequestDto } from './dto/create-service-request.dto';
+import { CreateServiceRequestDemoQuoteDto } from './dto/demo-quote-dto';
 import { UpdateServiceRequestDto } from './dto/update-service-request.dto';
 import {
   ServiceRequest,

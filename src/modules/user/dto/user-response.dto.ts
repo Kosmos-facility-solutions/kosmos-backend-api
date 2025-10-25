@@ -1,9 +1,9 @@
 import { Plain } from '@libraries/baseModel.entity';
-import { Exclude, Expose, plainToClass } from 'class-transformer';
-import { AuthType, User } from '../entities/user.entity';
 import { Role } from '@modules/role/entities/role.entity';
 import { UserRole } from '@modules/userrole/entities/userrole.entity';
 import { ApiHideProperty } from '@nestjs/swagger';
+import { Exclude, Expose, plainToClass } from 'class-transformer';
+import { AuthType, User } from '../entities/user.entity';
 
 export class UserResponseDto implements Plain<User> {
   @Expose()
@@ -14,6 +14,10 @@ export class UserResponseDto implements Plain<User> {
   lastName: string;
   @Expose()
   email: string;
+  @Expose()
+  phone: string;
+  @Expose()
+  additionalPhone: string;
   @Expose()
   isActive: boolean;
   @Expose()

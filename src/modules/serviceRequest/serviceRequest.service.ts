@@ -16,10 +16,8 @@ import { Sequelize } from 'sequelize-typescript';
 import { MailingService } from '../email/email.service';
 import { ApproveServiceRequestDto } from './dto/approved-service-request.dto';
 import { CancelServiceRequestDto } from './dto/cancel-service-request.dto';
-import {
-  CreateServiceRequestDemoQuoteDto,
-  CreateServiceRequestDto,
-} from './dto/create-service-request.dto';
+import { CreateServiceRequestDto } from './dto/create-service-request.dto';
+import { CreateServiceRequestDemoQuoteDto } from './dto/demo-quote-dto';
 import { UpdateServiceRequestDto } from './dto/update-service-request.dto';
 import {
   ServiceRequest,
@@ -117,22 +115,29 @@ export class ServiceRequestService {
       const serviceRequestData: any = {
         userId: user.id,
         propertyId: property.id,
-        serviceId: createServiceRequestDto.serviceId,
-        scheduledDate: new Date(createServiceRequestDto.scheduledDate),
-        scheduledTime: createServiceRequestDto.scheduledTime,
-        estimatedPrice: createServiceRequestDto.estimatedPrice,
+        serviceId: createServiceRequestDto.serviceRequest.serviceId,
+        scheduledDate: new Date(
+          createServiceRequestDto.serviceRequest.scheduledDate,
+        ),
+        scheduledTime: createServiceRequestDto.serviceRequest.scheduledTime,
+        estimatedPrice: createServiceRequestDto.serviceRequest.estimatedPrice,
         status: ServiceRequestStatus.Pending, // Always start as pending for quotes
-        priority: createServiceRequestDto.priority,
-        notes: createServiceRequestDto.notes,
-        specialInstructions: createServiceRequestDto.specialInstructions,
-        isRecurring: createServiceRequestDto.isRecurring || false,
-        recurrenceFrequency: createServiceRequestDto.recurrenceFrequency,
-        recurrenceEndDate: createServiceRequestDto.recurrenceEndDate
-          ? new Date(createServiceRequestDto.recurrenceEndDate)
+        priority: createServiceRequestDto.serviceRequest.priority,
+        notes: createServiceRequestDto.serviceRequest.notes,
+        specialInstructions:
+          createServiceRequestDto.serviceRequest.specialInstructions,
+        isRecurring:
+          createServiceRequestDto.serviceRequest.isRecurring || false,
+        recurrenceFrequency:
+          createServiceRequestDto.serviceRequest.recurrenceFrequency,
+        recurrenceEndDate: createServiceRequestDto.serviceRequest
+          .recurrenceEndDate
+          ? new Date(createServiceRequestDto.serviceRequest.recurrenceEndDate)
           : null,
         estimatedDurationMinutes:
-          createServiceRequestDto.estimatedDurationMinutes,
-        additionalServices: createServiceRequestDto.additionalServices,
+          createServiceRequestDto.serviceRequest.estimatedDurationMinutes,
+        additionalServices:
+          createServiceRequestDto.serviceRequest.additionalServices,
       };
 
       // 4. Create service request
