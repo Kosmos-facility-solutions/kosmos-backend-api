@@ -84,6 +84,8 @@ export const config = {
     apiRoot: process.env.URLS_API_ROOT || '',
     base: '',
     baseApi: '',
+    baseFrontEndURL:
+      process.env.BASE_FRONTEND_URL || 'https://kosmos-frontend.onrender.com',
   },
   jwt: {
     secret: process.env.JWT_SECRET || 'USE A REAL SECRET VALUE',
