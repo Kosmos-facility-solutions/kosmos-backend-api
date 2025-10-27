@@ -71,7 +71,8 @@ export class MailingService {
       'Email confirmation',
       'email_confirmation',
       {
-        path: config.urls.base + '/v1/auth/email/confirmation/' + token,
+        path:
+          config.urls.baseFrontEndURL + '/v1/auth/email/confirmation/' + token,
         name: user.firstName,
       },
     );
@@ -172,7 +173,7 @@ export class MailingService {
       recurrenceFrequency: serviceRequest.recurrenceFrequency,
       notes: serviceRequest.notes,
       specialInstructions: serviceRequest.specialInstructions,
-      adminPanelUrl: `${config.urls.base}/admin/service-requests/${serviceRequest.id}`,
+      adminPanelUrl: `${config.urls.baseFrontEndURL}/admin/service-requests/${serviceRequest.id}`,
     };
 
     const adminEmails = await this.getAdminEmails();
@@ -215,7 +216,7 @@ export class MailingService {
       isRecurring: serviceRequest.isRecurring,
       recurrenceFrequency: serviceRequest.recurrenceFrequency,
       temporaryPassword: temporaryPassword,
-      loginUrl: `${config.urls.base}/login`,
+      loginUrl: `${config.urls.baseFrontEndURL}/login`,
     };
 
     await this.sendEmail(
@@ -256,8 +257,8 @@ export class MailingService {
       recurrenceFrequency: serviceRequest.recurrenceFrequency,
       specialInstructions: serviceRequest.specialInstructions,
       assignedStaff: assignedStaff || null,
-      dashboardUrl: `${config.urls.base}/dashboard`,
-      calendarUrl: `${config.urls.base}/calendar`,
+      dashboardUrl: `${config.urls.baseFrontEndURL}/dashboard`,
+      calendarUrl: `${config.urls.baseFrontEndURL}/calendar`,
     };
 
     await this.sendEmail(
