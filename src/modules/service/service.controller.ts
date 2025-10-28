@@ -82,7 +82,6 @@ export class ServiceController {
 
   @ApiOperation({ summary: 'Get all active services' })
   @ApiCommonResponses()
-  @ValidateJWT()
   @Get('active')
   async findActiveServices() {
     return await this.serviceService.findActiveServices();
@@ -90,7 +89,6 @@ export class ServiceController {
 
   @ApiOperation({ summary: 'Get popular services' })
   @ApiCommonResponses()
-  @ValidateJWT()
   @Get('popular')
   async findPopularServices(@Query('limit', ParseIntPipe) limit?: number) {
     return await this.serviceService.findPopularServices(limit);
@@ -98,7 +96,6 @@ export class ServiceController {
 
   @ApiOperation({ summary: 'Get services by category' })
   @ApiCommonResponses()
-  @ValidateJWT()
   @Get('category/:category')
   async findByCategory(@Param('category') category: ServiceCategory) {
     return await this.serviceService.findByCategory(category);
@@ -109,7 +106,6 @@ export class ServiceController {
   @ApiOkResponseData(Service)
   @ApiQueryAttributes()
   @ApiQueryInclude()
-  @ValidateJWT()
   @Get(':id')
   async findOne(
     @Param('id', ParseIntPipe) id: number,
