@@ -709,6 +709,16 @@
           "field": "scheduledTime",
           "seqType": "Sequelize.TIME"
         },
+        "walkthroughDate": {
+          "allowNull": true,
+          "field": "walkthroughDate",
+          "seqType": "Sequelize.DATEONLY"
+        },
+        "walkthroughTime": {
+          "allowNull": true,
+          "field": "walkthroughTime",
+          "seqType": "Sequelize.TIME"
+        },
         "completedDate": {
           "allowNull": true,
           "field": "completedDate",
@@ -929,5 +939,5 @@
       "indexes": []
     }
   },
-  "revision": "20251101134917"
+  "revision": "20251103153557"
 }

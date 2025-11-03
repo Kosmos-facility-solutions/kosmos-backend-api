@@ -39,7 +39,15 @@ export class CreateServiceRequestDto {
 
   @IsNotEmpty()
   @IsString()
-  scheduledDate: string; // ✅ Cambiado a string
+  walkthroughDate: string;
+
+  @IsNotEmpty()
+  @IsString()
+  walkthroughTime: string;
+
+  @IsNotEmpty()
+  @IsString()
+  scheduledDate: string;
 
   @IsNotEmpty()
   @IsString()

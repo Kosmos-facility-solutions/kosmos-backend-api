@@ -50,6 +50,7 @@ export class ServiceRequestService {
     const data = {
       ...createServiceRequestDto,
       scheduledDate: new Date(createServiceRequestDto.scheduledDate),
+      walkthroughDate: new Date(createServiceRequestDto.walkthroughDate),
       recurrenceEndDate: createServiceRequestDto.recurrenceEndDate
         ? new Date(createServiceRequestDto.recurrenceEndDate)
         : null,

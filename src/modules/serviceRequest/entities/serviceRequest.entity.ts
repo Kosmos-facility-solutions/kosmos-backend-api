@@ -90,6 +90,18 @@ export class ServiceRequest extends BaseModel<ServiceRequest> {
     type: DataType.DATEONLY,
     allowNull: true,
   })
+  walkthroughDate: Date;
+
+  @Column({
+    type: DataType.TIME,
+    allowNull: true,
+  })
+  walkthroughTime: string;
+
+  @Column({
+    type: DataType.DATEONLY,
+    allowNull: true,
+  })
   completedDate: Date;
 
   @Column({

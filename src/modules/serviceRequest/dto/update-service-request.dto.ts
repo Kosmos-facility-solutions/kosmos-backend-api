@@ -48,6 +48,17 @@ export class UpdateServiceRequestDto {
   @Transform(({ value }) => (value ? new Date(value) : undefined), {
     toClassOnly: true,
   })
+  walkthroughDate?: Date;
+
+  @IsOptional()
+  @IsString()
+  walkthroughTime?: string;
+
+  @IsOptional()
+  @IsDateString()
+  @Transform(({ value }) => (value ? new Date(value) : undefined), {
+    toClassOnly: true,
+  })
   completedDate?: Date;
 
   @IsOptional()
