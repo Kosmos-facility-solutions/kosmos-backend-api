@@ -1,5 +1,7 @@
 import { Plain } from '@libraries/baseModel.entity';
+import { Property } from '@modules/property/entities/property.entity';
 import { Role } from '@modules/role/entities/role.entity';
+import { ServiceRequest } from '@modules/serviceRequest/entities/serviceRequest.entity';
 import { UserRole } from '@modules/userrole/entities/userrole.entity';
 import { ApiHideProperty } from '@nestjs/swagger';
 import { Exclude, Expose, plainToClass } from 'class-transformer';
@@ -33,6 +35,12 @@ export class UserResponseDto implements Plain<User> {
   @Expose()
   @ApiHideProperty()
   roles: Role[] = undefined;
+  @Expose()
+  @ApiHideProperty()
+  properties: Property[] = undefined;
+  @Expose()
+  @ApiHideProperty()
+  quotes: ServiceRequest[] = undefined;
   @Expose()
   createdAt: Date;
   @Expose()

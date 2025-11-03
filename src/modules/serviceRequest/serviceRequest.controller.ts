@@ -4,6 +4,7 @@ import { User } from '@decorators/user.decorator';
 import { ArrayWhereOptions } from '@libraries/baseModel.entity';
 import { IJwtPayload } from '@modules/auth/auth.service';
 import { IsOwner } from '@modules/auth/decorators/isOwner.decorator';
+import { IsOwnerOrIsRole } from '@modules/auth/decorators/isOwnerOrIsRole.decorator';
 import { IsRole } from '@modules/auth/decorators/isRole.decorator';
 import { ValidateJWT } from '@modules/auth/decorators/validateJWT.decorator';
 import { CreatePropertyDto } from '@modules/property/dto/create-property.dto';
@@ -170,7 +171,7 @@ export class ServiceRequestController {
   @ApiOkResponseData(ServiceRequest)
   @ApiQueryAttributes()
   @ApiQueryInclude()
-  @IsOwner(ServiceRequestService)
+  @IsOwnerOrIsRole(ServiceRequestService, [ROLES.ADMIN])
   @ValidateJWT()
   @Get(':id')
   async findOne(

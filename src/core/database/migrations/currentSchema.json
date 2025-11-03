@@ -60,6 +60,170 @@
         }
       }
     },
+    "contract": {
+      "tableName": "contract",
+      "schema": {
+        "id": {
+          "autoIncrement": true,
+          "allowNull": true,
+          "primaryKey": true,
+          "field": "id",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "clientId": {
+          "allowNull": false,
+          "field": "clientId",
+          "name": "clientId",
+          "references": {
+            "model": "user",
+            "key": "id"
+          },
+          "onDelete": "NO ACTION",
+          "onUpdate": "CASCADE",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "serviceRequestId": {
+          "allowNull": true,
+          "field": "serviceRequestId",
+          "name": "serviceRequestId",
+          "references": {
+            "model": "service_request",
+            "key": "id"
+          },
+          "onDelete": "SET NULL",
+          "onUpdate": "CASCADE",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "propertyId": {
+          "allowNull": false,
+          "field": "propertyId",
+          "name": "propertyId",
+          "references": {
+            "model": "property",
+            "key": "id"
+          },
+          "onDelete": "NO ACTION",
+          "onUpdate": "CASCADE",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "contractNumber": {
+          "allowNull": false,
+          "unique": true,
+          "field": "contractNumber",
+          "seqType": "Sequelize.STRING"
+        },
+        "status": {
+          "allowNull": false,
+          "defaultValue": {
+            "value": "draft"
+          },
+          "field": "status",
+          "seqType": "Sequelize.ENUM('draft', 'active', 'paused', 'completed', 'cancelled')"
+        },
+        "startDate": {
+          "allowNull": false,
+          "field": "startDate",
+          "seqType": "Sequelize.DATEONLY"
+        },
+        "endDate": {
+          "allowNull": true,
+          "field": "endDate",
+          "seqType": "Sequelize.DATEONLY"
+        },
+        "paymentAmount": {
+          "allowNull": false,
+          "field": "paymentAmount",
+          "seqType": "Sequelize.DECIMAL(10, 2)"
+        },
+        "paymentFrequency": {
+          "allowNull": false,
+          "field": "paymentFrequency",
+          "seqType": "Sequelize.ENUM('weekly', 'bi_weekly', 'monthly', 'quarterly', 'one_time')"
+        },
+        "nextPaymentDue": {
+          "allowNull": true,
+          "field": "nextPaymentDue",
+          "seqType": "Sequelize.DATEONLY"
+        },
+        "lastPaymentDate": {
+          "allowNull": true,
+          "field": "lastPaymentDate",
+          "seqType": "Sequelize.DATEONLY"
+        },
+        "paymentMethod": {
+          "allowNull": true,
+          "field": "paymentMethod",
+          "seqType": "Sequelize.STRING"
+        },
+        "workDays": {
+          "allowNull": true,
+          "field": "workDays",
+          "seqType": "Sequelize.JSON"
+        },
+        "workStartTime": {
+          "allowNull": true,
+          "field": "workStartTime",
+          "seqType": "Sequelize.TIME"
+        },
+        "workEndTime": {
+          "allowNull": true,
+          "field": "workEndTime",
+          "seqType": "Sequelize.TIME"
+        },
+        "serviceFrequency": {
+          "allowNull": false,
+          "defaultValue": {
+            "value": "weekly"
+          },
+          "field": "serviceFrequency",
+          "seqType": "Sequelize.ENUM('one_time', 'daily', 'weekly', 'bi_weekly', 'monthly', 'quarterly')"
+        },
+        "terms": {
+          "allowNull": true,
+          "field": "terms",
+          "seqType": "Sequelize.TEXT"
+        },
+        "notes": {
+          "allowNull": true,
+          "field": "notes",
+          "seqType": "Sequelize.TEXT"
+        },
+        "scope": {
+          "allowNull": true,
+          "field": "scope",
+          "seqType": "Sequelize.TEXT"
+        },
+        "isActive": {
+          "allowNull": false,
+          "defaultValue": {
+            "value": true
+          },
+          "field": "isActive",
+          "seqType": "Sequelize.BOOLEAN"
+        },
+        "totalContractValue": {
+          "allowNull": true,
+          "field": "totalContractValue",
+          "seqType": "Sequelize.DECIMAL(10, 2)"
+        },
+        "estimatedDurationMinutes": {
+          "allowNull": true,
+          "field": "estimatedDurationMinutes",
+          "seqType": "Sequelize.INTEGER"
+        },
+        "createdAt": {
+          "allowNull": false,
+          "field": "createdAt",
+          "seqType": "Sequelize.DATE"
+        },
+        "updatedAt": {
+          "allowNull": false,
+          "field": "updatedAt",
+          "seqType": "Sequelize.DATE"
+        }
+      },
+      "indexes": []
+    },
     "property": {
       "tableName": "property",
       "schema": {
@@ -765,5 +929,5 @@
       "indexes": []
     }
   },
-  "revision": "20251025132757"
+  "revision": "20251101134917"
 }

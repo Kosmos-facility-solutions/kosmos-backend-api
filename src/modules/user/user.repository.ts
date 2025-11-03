@@ -1,15 +1,15 @@
-import { SequelizeCrudRepository } from 'src/libraries/SequelizeCrudRepository';
-import { User } from './entities/user.entity';
+import { Role } from '@modules/role/entities/role.entity';
 import {
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Sequelize } from 'sequelize-typescript';
-import { Role } from '@modules/role/entities/role.entity';
 import _ from 'lodash';
 import { Identifier, Transaction } from 'sequelize';
+import { Sequelize } from 'sequelize-typescript';
+import { SequelizeCrudRepository } from 'src/libraries/SequelizeCrudRepository';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UserRepository extends SequelizeCrudRepository<User> {

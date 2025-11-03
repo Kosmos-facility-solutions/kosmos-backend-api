@@ -1,6 +1,8 @@
 import { BaseModel } from '@libraries/baseModel.entity';
 import { FederatedCredential } from '@modules/auth/entities/federatedCredential.entity';
+import { Property } from '@modules/property/entities/property.entity';
 import { Role } from '@modules/role/entities/role.entity';
+import { ServiceRequest } from '@modules/serviceRequest/entities/serviceRequest.entity';
 import { UserRole } from '@modules/userrole/entities/userrole.entity';
 import { ApiHideProperty } from '@nestjs/swagger';
 import bcrypt from 'bcrypt';
@@ -110,6 +112,22 @@ export class User extends BaseModel<User> {
     constraints: true,
   })
   roles: Role[];
+
+  @ApiHideProperty()
+  @HasMany(() => Property, {
+    foreignKey: 'userId',
+    hooks: true,
+    onDelete: 'CASCADE',
+  })
+  properties: Property[];
+
+  @ApiHideProperty()
+  @HasMany(() => ServiceRequest, {
+    foreignKey: 'userId',
+    hooks: true,
+    onDelete: 'CASCADE',
+  })
+  quotes: ServiceRequest[];
 
   @BeforeBulkCreate
   @BeforeBulkUpdate

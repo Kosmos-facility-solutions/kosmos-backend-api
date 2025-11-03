@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UserRepository } from './user.repository';
-import { IncludeOptions, OrderItem } from 'sequelize';
-import { User } from './entities/user.entity';
-import { RoleRepository } from '@modules/role/role.repository';
-import { ROLES } from '@modules/role/enums/roles.enum';
-import { UserResponseDto } from './dto/user-response.dto';
 import { PaginatedDto } from '@common/dto/paginated.dto';
 import { ArrayWhereOptions } from '@libraries/baseModel.entity';
+import { ROLES } from '@modules/role/enums/roles.enum';
+import { RoleRepository } from '@modules/role/role.repository';
+import { Injectable } from '@nestjs/common';
+import { IncludeOptions, OrderItem } from 'sequelize';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UserResponseDto } from './dto/user-response.dto';
+import { User } from './entities/user.entity';
+import { UserRepository } from './user.repository';
 
 @Injectable()
 export class UserService {

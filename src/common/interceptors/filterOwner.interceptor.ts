@@ -1,8 +1,9 @@
+import { ROLES } from '@modules/role/enums/roles.enum';
 import {
+  CallHandler,
+  ExecutionContext,
   Injectable,
   NestInterceptor,
-  ExecutionContext,
-  CallHandler,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ParseWherePipe } from '@pipes/parseWhere.pipe';
@@ -19,11 +20,23 @@ export class FilterOwnerInterceptor<T>
   implements NestInterceptor<T, Response<T>>
 {
   constructor(private reflector: Reflector) {}
+
   intercept(
     context: ExecutionContext,
     next: CallHandler,
   ): Observable<Response<T>> {
     const req = context.switchToHttp().getRequest<Request>();
+
+    // Verificar si el usuario es admin
+    const userRoles = req.session.jwt.roles.map((role) => role.name);
+    const isAdmin = userRoles.includes(ROLES.ADMIN);
+
+    // Si es admin, NO filtrar - retornar todos los registros
+    if (isAdmin) {
+      return next.handle();
+    }
+
+    // Si NO es admin, filtrar por userId
     const key = this.reflector.get('key', context.getHandler());
     const whereElement = { [key]: req.session.jwt.id };
     req.session.where = Array.isArray(req.session.where)
@@ -40,25 +53,7 @@ export class FilterOwnerInterceptor<T>
       req.query.where = [...req.session.where, ...req.query.where];
     }
     if (_.isNil(req.query.where)) req.query.where = [...req.session.where];
+
     return next.handle();
   }
 }
-
-// const whereValue = req.query?.where ?? '[]';
-// try {
-//   let where: object[] = JSON.parse(whereValue);
-//   if (!_.isArray(where)) {
-//     where = [];
-//   }
-//   // Omit any undefined values
-//   where = where.filter((p) => p != undefined);
-//   const key = this.reflector.get('key', context.getHandler());
-//   where.push({ [key]: req.session.jwt.id });
-//   req.query.where = JSON.stringify(where);
-//   return next.handle();
-// } catch (e) {
-//   throw new HttpException(
-//     `Validation failed (Array string is expected) for where`,
-//     HttpStatus.BAD_REQUEST,
-//   );
-// }

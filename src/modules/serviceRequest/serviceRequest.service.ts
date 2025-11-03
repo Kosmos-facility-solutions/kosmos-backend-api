@@ -1,6 +1,12 @@
 import { PaginatedDto } from '@common/dto/paginated.dto';
 import { Logger } from '@core/logger/Logger';
 import { ArrayWhereOptions } from '@libraries/baseModel.entity';
+import { ContractService } from '@modules/contract/contract.service';
+import { ContractResponseDto } from '@modules/contract/dto/contract-response.dto';
+import {
+  ContractStatus,
+  PaymentFrequency,
+} from '@modules/contract/entities/contract.entity';
 import { PropertyRepository } from '@modules/property/property.repository';
 import { PropertyService } from '@modules/property/property.service';
 import { User } from '@modules/user/entities/user.entity';
@@ -20,6 +26,7 @@ import { CreateServiceRequestDto } from './dto/create-service-request.dto';
 import { CreateServiceRequestDemoQuoteDto } from './dto/demo-quote-dto';
 import { UpdateServiceRequestDto } from './dto/update-service-request.dto';
 import {
+  RecurrenceFrequency,
   ServiceRequest,
   ServiceRequestStatus,
 } from './entities/serviceRequest.entity';
@@ -35,7 +42,8 @@ export class ServiceRequestService {
     private userService: UserService,
     private propertyService: PropertyService,
     private propertyRepository: PropertyRepository,
-    private sequelize: Sequelize, // For transactions
+    private sequelize: Sequelize, // For transactions,
+    private contractService: ContractService,
   ) {}
 
   async create(createServiceRequestDto: CreateServiceRequestDto) {
@@ -343,7 +351,78 @@ export class ServiceRequestService {
           assignedStaffName = 'Service Team'; // Replace with actual staff lookup
         }
 
-        // Send approval email to existing customer
+        // 4. CREATE CONTRACT AUTOMATICALLY 🎯
+        try {
+          // Determine payment frequency based on service frequency
+          let paymentFrequency: PaymentFrequency;
+          switch (fullServiceRequest.recurrenceFrequency) {
+            case RecurrenceFrequency.Weekly:
+              paymentFrequency = PaymentFrequency.Weekly;
+              break;
+            case RecurrenceFrequency.BiWeekly:
+              paymentFrequency = PaymentFrequency.BiWeekly;
+              break;
+            case RecurrenceFrequency.Monthly:
+              paymentFrequency = PaymentFrequency.Monthly;
+              break;
+            case RecurrenceFrequency.Quarterly:
+              paymentFrequency = PaymentFrequency.Quarterly;
+              break;
+            default:
+              paymentFrequency = PaymentFrequency.OneTime;
+          }
+
+          // Calculate contract dates
+          const startDate = new Date(fullServiceRequest.scheduledDate);
+          let endDate = null;
+
+          if (fullServiceRequest.recurrenceEndDate) {
+            endDate = new Date(fullServiceRequest.recurrenceEndDate);
+          } else if (fullServiceRequest.isRecurring) {
+            // Default: 1 year contract for recurring services
+            endDate = new Date(startDate);
+            endDate.setFullYear(endDate.getFullYear() + 1);
+          }
+
+          // Calculate next payment due date (7 days from start for first payment)
+          const nextPaymentDue = new Date(startDate);
+          nextPaymentDue.setDate(nextPaymentDue.getDate() + 7);
+
+          // Create contract
+          const contractData = {
+            clientId: fullServiceRequest.userId,
+            serviceRequestId: fullServiceRequest.id,
+            propertyId: fullServiceRequest.propertyId,
+            startDate: startDate.toISOString().split('T')[0],
+            endDate: endDate ? endDate.toISOString().split('T')[0] : null,
+            paymentAmount: Number(fullServiceRequest.estimatedPrice),
+            paymentFrequency,
+            nextPaymentDue: nextPaymentDue.toISOString().split('T')[0],
+            serviceFrequency: fullServiceRequest.recurrenceFrequency,
+            workStartTime: fullServiceRequest.scheduledTime,
+            status: ContractStatus.Active,
+            scope:
+              fullServiceRequest.specialInstructions ||
+              `${fullServiceRequest.service?.name} service`,
+            notes:
+              approveDto.adminNotes ||
+              'Contract created from approved service request',
+            estimatedDurationMinutes:
+              fullServiceRequest.estimatedDurationMinutes,
+            isActive: true,
+          };
+
+          const contract: ContractResponseDto =
+            await this.contractService.create(contractData);
+
+          this.logger.log(
+            `Contract ${contract.contractNumber} created for ServiceRequest #${id}`,
+          );
+        } catch (error) {
+          this.logger.error('Error creating contract:', error);
+        }
+
+        // 5. Send approval email to existing customer
         await this.mailingService.sendServiceApprovedExistingCustomerEmail(
           fullServiceRequest,
           assignedStaffName,

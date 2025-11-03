@@ -1,3 +1,4 @@
+import { ContractModule } from '@modules/contract/contract.module';
 import { EmailModule } from '@modules/email/email.module';
 import { PropertyModule } from '@modules/property/property.module';
 import { ServiceModule } from '@modules/service/service.module';
@@ -20,6 +21,7 @@ import { UserModule } from './modules/user/user.module';
     ServiceModule,
     ServiceRequestModule,
     ServiceReportModule,
+    ContractModule,
   ],
   controllers: [AppController],
   providers: [AppService],
