@@ -859,6 +859,14 @@
           "field": "isEmailConfirmed",
           "seqType": "Sequelize.BOOLEAN"
         },
+        "isFirstLogin": {
+          "allowNull": false,
+          "defaultValue": {
+            "value": true
+          },
+          "field": "isFirstLogin",
+          "seqType": "Sequelize.BOOLEAN"
+        },
         "password": {
           "allowNull": false,
           "validate": {
@@ -939,5 +947,5 @@
       "indexes": []
     }
   },
-  "revision": "20251103153557"
+  "revision": "20251104172401"
 }

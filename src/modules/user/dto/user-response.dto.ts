@@ -24,6 +24,8 @@ export class UserResponseDto implements Plain<User> {
   isActive: boolean;
   @Expose()
   isEmailConfirmed: boolean;
+  @Expose()
+  isFirstLogin: boolean;
   @Exclude()
   @ApiHideProperty()
   password: string;

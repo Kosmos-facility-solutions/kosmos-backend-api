@@ -81,6 +81,13 @@ export class User extends BaseModel<User> {
   isEmailConfirmed: boolean;
 
   @Column({
+    type: DataType.BOOLEAN,
+    allowNull: false,
+    defaultValue: true,
+  })
+  isFirstLogin: boolean;
+
+  @Column({
     type: DataType.STRING,
     allowNull: false,
     validate: {
