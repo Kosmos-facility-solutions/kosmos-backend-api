@@ -128,7 +128,13 @@ export class AuthService {
       token: accessToken.token,
       expires: accessToken.expires,
       refreshToken: refreshToken.token,
-      user: _.pick(user, ['id', 'firstName', 'email']),
+      user: _.pick(user, [
+        'id',
+        'firstName',
+        'email',
+        'lastName',
+        'isFirstLogin',
+      ]),
       roles: user.roles,
     });
     return credentials;
@@ -144,6 +150,10 @@ export class AuthService {
       const user = await this.userRepository.findOneByEmail(
         resetPasswordEmailDto.email,
       );
+
+      if (user.isFirstLogin) {
+        await user.update({ isFirstLogin: false });
+      }
       const token = await this.createToken(user, TOKEN_TYPE.RESET);
       await this.emailService.sendResetPasswordTokenEmail(user, token.token);
     } catch (error) {

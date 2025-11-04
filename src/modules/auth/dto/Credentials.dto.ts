@@ -1,4 +1,3 @@
-import { Plain } from '@libraries/baseModel.entity';
 import { Role } from '@modules/role/entities/role.entity';
 import { UserResponseDto } from '@modules/user/dto/user-response.dto';
 import { PickType } from '@nestjs/swagger';
@@ -8,6 +7,8 @@ export class UserCredentialsDto extends PickType(UserResponseDto, [
   'id',
   'firstName',
   'email',
+  'lastName',
+  'isFirstLogin',
 ] as const) {}
 
 export class CredentialsDto {
