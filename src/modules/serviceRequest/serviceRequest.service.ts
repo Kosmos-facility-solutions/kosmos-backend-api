@@ -9,9 +9,12 @@ import {
 } from '@modules/contract/entities/contract.entity';
 import { PropertyRepository } from '@modules/property/property.repository';
 import { PropertyService } from '@modules/property/property.service';
+import { Role } from '@modules/role/entities/role.entity';
+import { ROLES } from '@modules/role/enums/roles.enum';
 import { User } from '@modules/user/entities/user.entity';
 import { UserRepository } from '@modules/user/user.repository';
 import { UserService } from '@modules/user/user.service';
+import { UserRole } from '@modules/userrole/entities/userrole.entity';
 import {
   BadRequestException,
   Injectable,
@@ -102,10 +105,11 @@ export class ServiceRequestService {
           {
             ...createServiceRequestDto.user,
             password: temporaryPassword,
+            isActive: true,
+            isEmailConfirmed: true,
           },
           transaction,
         );
-
         this.logger.log(`New user created: ${user.email}`);
       } else {
         this.logger.log(`Existing user found: ${user.email}`);
@@ -159,6 +163,9 @@ export class ServiceRequestService {
 
       // Commit transaction
       await transaction.commit();
+
+      const role = await Role.findOne({ where: { name: ROLES.USER } });
+      await UserRole.create({ userId: user.id, roleId: role.id });
 
       // 5. Fetch complete service request with relations
       const fullServiceRequest =
