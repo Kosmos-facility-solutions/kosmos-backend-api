@@ -1,12 +1,15 @@
 import { PaginatedDto } from '@common/dto/paginated.dto';
 import { Logger } from '@core/logger/Logger';
 import { ArrayWhereOptions } from '@libraries/baseModel.entity';
+import { MailingService } from '@modules/email/email.service';
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { format } from 'date-fns';
 import { IncludeOptions, OrderItem } from 'sequelize';
+import { ContractPdfService } from './contract-pdf.service';
 import { ContractRepository } from './contract.repository';
 import { ContractResponseDto } from './dto/contract-response.dto';
 import { CreateContractDto } from './dto/create-contract.dto';
@@ -17,7 +20,11 @@ import { Contract, ContractStatus } from './entities/contract.entity';
 export class ContractService {
   private logger: Logger = new Logger(ContractService.name);
 
-  constructor(private contractRepository: ContractRepository) {}
+  constructor(
+    private contractRepository: ContractRepository,
+    private contractPdfService: ContractPdfService,
+    private mailingService: MailingService,
+  ) {}
 
   async create(
     createContractDto: CreateContractDto,
@@ -323,5 +330,87 @@ export class ContractService {
     const contracts =
       await this.contractRepository.findExpiringContracts(daysAhead);
     return ContractResponseDto.fromContract(contracts);
+  }
+
+  /**
+   * Envía el contrato por correo con el PDF adjunto
+   */
+  async sendContractEmailWithPdf(contractId: number): Promise<void> {
+    const contract = await this.contractRepository.findOneById(contractId, [
+      { association: 'client' },
+      { association: 'property' },
+      {
+        association: 'serviceRequest',
+        include: [{ association: 'service' }],
+      },
+    ]);
+
+    if (!contract) {
+      throw new Error('Contract not found');
+    }
+
+    const pdfBuffer =
+      await this.contractPdfService.generateContractPdf(contract);
+
+    const emailData = {
+      clientName:
+        contract.client?.firstName + ' ' + contract.client.lastName || 'Client',
+      contractNumber: contract.contractNumber,
+      serviceName: contract.serviceRequest?.service?.name || 'Service',
+      startDate: format(new Date(contract.startDate), 'MMMM dd, yyyy'),
+      endDate: contract.endDate
+        ? format(new Date(contract.endDate), 'MMMM dd, yyyy')
+        : null,
+      paymentAmount: String(contract.paymentAmount),
+      paymentFrequency: this.formatPaymentFrequency(contract.paymentFrequency),
+      nextPaymentDue: contract.nextPaymentDue
+        ? format(new Date(contract.nextPaymentDue), 'MMMM dd, yyyy')
+        : null,
+      propertyName: contract.property?.name || 'Property',
+      propertyAddress: contract.property?.address || '',
+      dashboardUrl: `${process.env.FRONTEND_URL}/dashboard/contracts/${contract.id}`,
+    };
+
+    await this.mailingService.sendContractApprovedEmail(
+      contract.client?.email || '',
+      emailData,
+      pdfBuffer,
+      `Contract_${contract.contractNumber}.pdf`,
+    );
+  }
+
+  /**
+   * Genera el PDF del contrato por ID
+   */
+  async generateContractPdfById(contractId: number): Promise<Buffer> {
+    const contract = await this.contractRepository.findOneById(contractId, [
+      { association: 'client' },
+      { association: 'property' },
+      {
+        association: 'serviceRequest',
+        include: [{ association: 'service' }],
+      },
+    ]);
+
+    if (!contract) {
+      throw new Error('Contract not found');
+    }
+
+    return await this.contractPdfService.generateContractPdf(contract);
+  }
+
+  /**
+   * Formatea la frecuencia de pago
+   */
+  private formatPaymentFrequency(frequency: string): string {
+    const frequencyMap: Record<string, string> = {
+      one_time: 'One-Time Payment',
+      weekly: 'Weekly',
+      bi_weekly: 'Bi-Weekly',
+      monthly: 'Monthly',
+      quarterly: 'Quarterly',
+      yearly: 'Yearly',
+    };
+    return frequencyMap[frequency] || frequency;
   }
 }

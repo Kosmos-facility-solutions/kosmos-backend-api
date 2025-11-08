@@ -58,4 +58,41 @@ export class EmailHttpService {
       throw error;
     }
   }
+
+  /**
+   * Send email with attachment (for PDFs)
+   */
+  async sendWithAttachment(
+    to: string | string[],
+    subject: string,
+    html: string,
+    attachments: Array<{
+      filename: string;
+      content: Buffer;
+      contentType: string;
+    }>,
+  ) {
+    try {
+      const { data, error } = await this.resend.emails.send({
+        from: config.email.from_address,
+        to: Array.isArray(to) ? to : [to],
+        subject,
+        html,
+        attachments: attachments.map((att) => ({
+          filename: att.filename,
+          content: att.content,
+        })),
+      });
+
+      if (error) {
+        throw new Error(`Resend error: ${JSON.stringify(error)}`);
+      }
+
+      this.logger.log(`✅ Email with attachment sent: ${data.id}`);
+      return data;
+    } catch (error) {
+      this.logger.error('❌ Failed to send email with attachment:', error);
+      throw error;
+    }
+  }
 }

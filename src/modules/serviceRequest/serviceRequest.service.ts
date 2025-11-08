@@ -408,6 +408,10 @@ export class ServiceRequestService {
             nextPaymentDue: nextPaymentDue.toISOString().split('T')[0],
             serviceFrequency: fullServiceRequest.recurrenceFrequency,
             workStartTime: fullServiceRequest.scheduledTime,
+            workEndTime: new Date(
+              new Date(fullServiceRequest.scheduledTime).getTime() +
+                8 * 60 * 60 * 1000,
+            ).toISOString(),
             status: ContractStatus.Active,
             scope:
               fullServiceRequest.specialInstructions ||
@@ -426,6 +430,15 @@ export class ServiceRequestService {
           this.logger.log(
             `Contract ${contract.contractNumber} created for ServiceRequest #${id}`,
           );
+          try {
+            await this.contractService.sendContractEmailWithPdf(contract.id);
+
+            this.logger.log(
+              `Contract PDF email sent for Contract #${contract.contractNumber}`,
+            );
+          } catch (pdfError) {
+            this.logger.error('Error sending contract PDF email: ', pdfError);
+          }
         } catch (error) {
           this.logger.error('Error creating contract:', error);
         }

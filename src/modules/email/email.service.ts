@@ -268,4 +268,54 @@ export class MailingService {
       context,
     );
   }
+
+  /**
+   * Envía email de contrato aprobado con PDF adjunto
+   */
+  async sendContractApprovedEmail(
+    to: string,
+    data: {
+      clientName: string;
+      contractNumber: string;
+      serviceName: string;
+      startDate: string;
+      endDate?: string;
+      paymentAmount: string;
+      paymentFrequency: string;
+      nextPaymentDue?: string;
+      propertyName: string;
+      propertyAddress: string;
+      dashboardUrl: string;
+    },
+    pdfBuffer: Buffer,
+    pdfFilename: string,
+  ): Promise<void> {
+    try {
+      const templatePath = path.join(
+        __dirname,
+        'templates',
+        'contract_approved_with_pdf.ejs',
+      );
+
+      const html = await ejs.renderFile(templatePath, data);
+
+      await this.emailHttpService.sendWithAttachment(
+        to,
+        `✅ Your Contract is Ready - ${data.contractNumber}`,
+        html,
+        [
+          {
+            filename: pdfFilename,
+            content: pdfBuffer,
+            contentType: 'application/pdf',
+          },
+        ],
+      );
+
+      this.logger.info(`Contract email sent successfully to ${to}`);
+    } catch (error) {
+      this.logger.error('Error sending contract email:', error);
+      throw new Error('Failed to send contract email');
+    }
+  }
 }

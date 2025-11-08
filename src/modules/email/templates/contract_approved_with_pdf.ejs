@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contract Approved - Kosmos Facility Solutions</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background-color: #f3f4f6;">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f3f4f6; padding: 40px 0;">
+    <tr>
+      <td align="center">
+        <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          
+          <tr>
+            <td style="background: linear-gradient(135deg, #1a56db 0%, #1e40af 100%); padding: 40px 50px; text-align: center;">
+              <h1 style="color: #ffffff; font-size: 28px; margin: 0 0 10px 0; font-weight: 700;">
+                🎉 Your Contract is Ready!
+              </h1>
+              <p style="color: #e0e7ff; font-size: 16px; margin: 0;">
+                Service Request Approved
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding: 50px;">
+              
+              <p style="color: #1f2937; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+                Hi <strong><%= clientName %></strong>,
+              </p>
+
+              <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin: 0 0 30px 0;">
+                Great news! Your service request has been <strong style="color: #059669;">approved</strong> and your contract is now ready. We've attached the official contract document to this email for your records.
+              </p>
+
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; margin: 0 0 30px 0; border: 2px solid #0ea5e9;">
+                <tr>
+                  <td style="padding: 30px;">
+                    <h3 style="color: #0c4a6e; font-size: 18px; margin: 0 0 20px 0; font-weight: 600;">
+                      📋 Contract Details
+                    </h3>
+                    
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td style="padding: 12px 0; color: #0369a1; font-size: 14px; width: 45%; font-weight: 600;">
+                          Contract Number
+                        </td>
+                        <td style="padding: 12px 0; color: #0c4a6e; font-size: 14px; font-weight: 700;">
+                          <%= contractNumber %>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 12px 0; color: #0369a1; font-size: 14px; font-weight: 600;">
+                          Service
+                        </td>
+                        <td style="padding: 12px 0; color: #0c4a6e; font-size: 14px;">
+                          <%= serviceName %>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 12px 0; color: #0369a1; font-size: 14px; font-weight: 600;">
+                          Start Date
+                        </td>
+                        <td style="padding: 12px 0; color: #0c4a6e; font-size: 14px;">
+                          <%= startDate %>
+                        </td>
+                      </tr>
+                      <% if (endDate) { %>
+                      <tr>
+                        <td style="padding: 12px 0; color: #0369a1; font-size: 14px; font-weight: 600;">
+                          End Date
+                        </td>
+                        <td style="padding: 12px 0; color: #0c4a6e; font-size: 14px;">
+                          <%= endDate %>
+                        </td>
+                      </tr>
+                      <% } %>
+                      <tr>
+                        <td style="padding: 12px 0; color: #0369a1; font-size: 14px; font-weight: 600;">
+                          Payment Amount
+                        </td>
+                        <td style="padding: 12px 0; color: #059669; font-size: 18px; font-weight: 700;">
+                          $<%= paymentAmount %>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 12px 0; color: #0369a1; font-size: 14px; font-weight: 600;">
+                          Payment Frequency
+                        </td>
+                        <td style="padding: 12px 0; color: #0c4a6e; font-size: 14px;">
+                          <%= paymentFrequency %>
+                        </td>
+                      </tr>
+                      <% if (nextPaymentDue) { %>
+                      <tr>
+                        <td style="padding: 12px 0; color: #0369a1; font-size: 14px; font-weight: 600;">
+                          Next Payment Due
+                        </td>
+                        <td style="padding: 12px 0; color: #dc2626; font-size: 14px; font-weight: 600;">
+                          <%= nextPaymentDue %>
+                        </td>
+                      </tr>
+                      <% } %>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f9fafb; border-radius: 12px; margin: 0 0 30px 0; border: 1px solid #e5e7eb;">
+                <tr>
+                  <td style="padding: 25px;">
+                    <h3 style="color: #1f2937; font-size: 16px; margin: 0 0 15px 0; font-weight: 600;">
+                      📍 Service Location
+                    </h3>
+                    <p style="color: #4b5563; font-size: 14px; line-height: 1.6; margin: 0;">
+                      <strong><%= propertyName %></strong><br>
+                      <%= propertyAddress %>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 8px; margin: 0 0 30px 0;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <p style="color: #92400e; font-size: 14px; line-height: 1.6; margin: 0;">
+                      <strong>📎 Contract Attached:</strong> Please review the attached PDF document carefully. This is your official service contract containing all terms and conditions.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <h3 style="color: #1f2937; font-size: 18px; margin: 0 0 20px 0; font-weight: 600;">
+                📝 What's Next?
+              </h3>
+
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0 0 30px 0;">
+                <tr>
+                  <td style="padding: 15px; background-color: #f9fafb; border-radius: 8px;">
+                    <p style="color: #1f2937; font-size: 14px; margin: 0; line-height: 1.6;">
+                      <strong style="color: #1a56db;">1.</strong> <strong>Review the Contract:</strong> Please read through the attached contract document carefully.
+                    </p>
+                  </td>
+                </tr>
+                <tr><td style="height: 10px;"></td></tr>
+                <tr>
+                  <td style="padding: 15px; background-color: #f9fafb; border-radius: 8px;">
+                    <p style="color: #1f2937; font-size: 14px; margin: 0; line-height: 1.6;">
+                      <strong style="color: #1a56db;">2.</strong> <strong>Keep for Your Records:</strong> Save this document for future reference.
+                    </p>
+                  </td>
+                </tr>
+                <tr><td style="height: 10px;"></td></tr>
+                <tr>
+                  <td style="padding: 15px; background-color: #f9fafb; border-radius: 8px;">
+                    <p style="color: #1f2937; font-size: 14px; margin: 0; line-height: 1.6;">
+                      <strong style="color: #1a56db;">3.</strong> <strong>Questions?</strong> Contact us anytime at <a href="mailto:support@kosmosfacility.com" style="color: #1a56db; text-decoration: none; font-weight: 600;">support@kosmosfacility.com</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0;">
+                <tr>
+                  <td align="center">
+                    <a href="<%= dashboardUrl %>" style="display: inline-block; background: linear-gradient(135deg, #1a56db 0%, #1e40af 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-size: 16px; font-weight: 600;">
+                      View in Dashboard
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin: 30px 0 0 0;">
+                We're excited to start working with you! If you have any questions, please don't hesitate to reach out.
+              </p>
+
+              <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin: 20px 0 0 0;">
+                Best regards,<br>
+                <strong style="color: #1f2937;">The Kosmos Facility Solutions Team</strong>
+              </p>
+
+            </td>
+          </tr>
+
+          <tr>
+            <td style="background-color: #f9fafb; padding: 30px 50px; border-top: 1px solid #e5e7eb;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 0 0 15px 0;">
+                      <strong style="color: #1f2937;">Kosmos Facility Solutions</strong><br>
+                      123 Main Street, Providence, RI 02903<br>
+                      Phone: (401) 555-0100 | Email: contracts@kosmosfacility.com
+                    </p>
+                    <p style="color: #9ca3af; font-size: 12px; margin: 15px 0 0 0;">
+                      © <%= new Date().getFullYear() %> Kosmos Facility Solutions. All rights reserved.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
