@@ -1,6 +1,7 @@
 import { PaginatedDto } from '@common/dto/paginated.dto';
 import { Logger } from '@core/logger/Logger';
 import { ArrayWhereOptions } from '@libraries/baseModel.entity';
+import { generateTemporaryPassword } from '@libraries/util';
 import { ContractService } from '@modules/contract/contract.service';
 import { ContractResponseDto } from '@modules/contract/dto/contract-response.dto';
 import {
@@ -99,7 +100,7 @@ export class ServiceRequestService {
 
       if (!user) {
         // Create new user with a temporary password
-        const temporaryPassword = this.generateTemporaryPassword();
+        const temporaryPassword = generateTemporaryPassword();
 
         user = await this.userRepository.create(
           {
@@ -324,7 +325,7 @@ export class ServiceRequestService {
 
     try {
       if (isNewCustomer) {
-        const temporaryPassword = this.generateTemporaryPassword();
+        const temporaryPassword = generateTemporaryPassword();
 
         // Check if user already exists
         const user = await this.userRepository.findOneByEmail(
@@ -459,36 +460,5 @@ export class ServiceRequestService {
     }
 
     return fullServiceRequest;
-  }
-
-  /**
-   * Generate a secure temporary password
-   */
-  private generateTemporaryPassword(): string {
-    const length = 12;
-    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-    const numbers = '0123456789';
-    const symbols = '!@#$%';
-
-    const allChars = uppercase + lowercase + numbers + symbols;
-    let password = '';
-
-    // Ensure at least one of each type
-    password += uppercase[Math.floor(Math.random() * uppercase.length)];
-    password += lowercase[Math.floor(Math.random() * lowercase.length)];
-    password += numbers[Math.floor(Math.random() * numbers.length)];
-    password += symbols[Math.floor(Math.random() * symbols.length)];
-
-    // Fill the rest randomly
-    for (let i = password.length; i < length; i++) {
-      password += allChars[Math.floor(Math.random() * allChars.length)];
-    }
-
-    // Shuffle the password
-    return password
-      .split('')
-      .sort(() => Math.random() - 0.5)
-      .join('');
   }
 }

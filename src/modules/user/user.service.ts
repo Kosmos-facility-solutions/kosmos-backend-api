@@ -1,5 +1,7 @@
 import { PaginatedDto } from '@common/dto/paginated.dto';
 import { ArrayWhereOptions } from '@libraries/baseModel.entity';
+import { generateTemporaryPassword } from '@libraries/util';
+import { MailingService } from '@modules/email/email.service';
 import { ROLES } from '@modules/role/enums/roles.enum';
 import { RoleRepository } from '@modules/role/role.repository';
 import { Injectable } from '@nestjs/common';
@@ -15,6 +17,7 @@ export class UserService {
   constructor(
     private userRepository: UserRepository,
     private roleRepository: RoleRepository,
+    private emailService: MailingService,
   ) {}
   async create(createUserDto: CreateUserDto) {
     let user: User = null;
@@ -24,6 +27,31 @@ export class UserService {
       const userRole = await this.roleRepository.findByName(ROLES.USER, t);
       await user.addRole(userRole.id, t);
     });
+
+    return UserResponseDto.fromUser(user);
+  }
+
+  async createEmployee(createUserDto: CreateUserDto) {
+    let user: User = null;
+    const temporaryPassword = generateTemporaryPassword();
+    const employeeData = {
+      ...createUserDto,
+      password: temporaryPassword,
+      isFirstLogin: true,
+      isActive: true,
+      isEmailConfirmed: false,
+    };
+
+    await this.userRepository.executeTransaction(async (t) => {
+      user = await this.userRepository.create(employeeData, t);
+      const employeeRole = await this.roleRepository.findByName(
+        ROLES.EMPLOYEE,
+        t,
+      );
+      await user.addRole(employeeRole.id, t);
+    });
+
+    await this.emailService.sendEmployeeWelcomeEmail(user, temporaryPassword);
 
     return UserResponseDto.fromUser(user);
   }

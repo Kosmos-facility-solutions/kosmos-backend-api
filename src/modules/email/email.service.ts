@@ -95,7 +95,11 @@ export class MailingService {
       property?: any;
     },
   ) {
-    const formattedDate = format(
+    const scheduledFormattedDate = format(
+      new Date(serviceRequest.scheduledDate),
+      'MMMM dd, yyyy',
+    );
+    const walkthroughFormattedDate = format(
       new Date(serviceRequest.scheduledDate),
       'MMMM dd, yyyy',
     );
@@ -105,8 +109,10 @@ export class MailingService {
       requestId: serviceRequest.id,
       serviceName: serviceRequest.service?.name || 'Service',
       propertyName: serviceRequest.property?.name || 'Property',
-      scheduledDate: formattedDate,
+      scheduledDate: scheduledFormattedDate,
       scheduledTime: serviceRequest.scheduledTime,
+      walkthroughTime: serviceRequest.walkthroughTime,
+      walkthroughDate: walkthroughFormattedDate,
       estimatedPrice: Number(serviceRequest.estimatedPrice || 0).toFixed(2),
       isRecurring: serviceRequest.isRecurring,
       recurrenceFrequency: serviceRequest.recurrenceFrequency,
@@ -149,7 +155,11 @@ export class MailingService {
       property?: any;
     },
   ) {
-    const formattedDate = format(
+    const scheduledFormattedDate = format(
+      new Date(serviceRequest.scheduledDate),
+      'MMMM dd, yyyy',
+    );
+    const walkthroughFormattedDate = format(
       new Date(serviceRequest.scheduledDate),
       'MMMM dd, yyyy',
     );
@@ -163,8 +173,10 @@ export class MailingService {
       serviceName: serviceRequest.service?.name || 'Service',
       propertyName: serviceRequest.property?.name || 'Property',
       propertyAddress: serviceRequest.property?.address || 'N/A',
-      scheduledDate: formattedDate,
+      scheduledDate: scheduledFormattedDate,
       scheduledTime: serviceRequest.scheduledTime,
+      walkthroughDate: walkthroughFormattedDate,
+      walkthroughTime: serviceRequest.scheduledTime,
       estimatedDuration: serviceRequest.estimatedDurationMinutes || 60,
       estimatedPrice: Number(serviceRequest.estimatedPrice || 0).toFixed(2),
       status: serviceRequest.status,
@@ -317,5 +329,30 @@ export class MailingService {
       this.logger.error('Error sending contract email:', error);
       throw new Error('Failed to send contract email');
     }
+  }
+
+  /**
+   * Send welcome email to new employee with temporary credentials
+   */
+  async sendEmployeeWelcomeEmail(
+    employee: User,
+    temporaryPassword: string,
+  ): Promise<void> {
+    const context = {
+      firstName: employee.firstName || 'Team Member',
+      lastName: employee.lastName || '',
+      email: employee.email,
+      temporaryPassword: temporaryPassword,
+      loginUrl: config.urls.baseFrontEndURL || 'https://app.kosmosfs.com',
+    };
+
+    await this.sendEmail(
+      employee.email,
+      'Welcome to Kosmos Facility Solutions - Your Employee Account',
+      'employee_welcome',
+      context,
+    );
+
+    this.logger.info(`Employee welcome email sent to: ${employee.email}`);
   }
 }

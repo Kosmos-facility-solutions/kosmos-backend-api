@@ -19,6 +19,11 @@ export class CreateUserDto {
   @IsPhoneNumber()
   phone: string;
 
+  @IsNotEmpty()
+  @MaxLength(255)
+  @IsPhoneNumber()
+  additionalPhone: string;
+
   //@IsNotEmpty()
   @IsOptional() //Set as optional for the current user creation flow
   @MinLength(8)

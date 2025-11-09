@@ -44,6 +44,16 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiOperation({ summary: 'Create an Employee user (Admin only)' })
+  @ApiCommonResponses()
+  @ApiCreatedResponseData(UserResponseDto)
+  @IsRole(ROLES.ADMIN)
+  @ValidateJWT()
+  @Post('employee')
+  async createEmployee(@Body() createUserDto: CreateUserDto) {
+    return await this.userService.createEmployee(createUserDto);
+  }
+
   @ApiOperation({ summary: 'Get all User entries' })
   @ApiQueryAttributes()
   @ApiQueryWhere()
