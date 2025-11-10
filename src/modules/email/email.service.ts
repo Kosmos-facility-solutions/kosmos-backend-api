@@ -211,8 +211,12 @@ export class MailingService {
     },
     temporaryPassword: string,
   ) {
-    const formattedDate = format(
+    const scheduledFormattedDate = format(
       new Date(serviceRequest.scheduledDate),
+      'MMMM dd, yyyy',
+    );
+    const walkthroughFormattedDate = format(
+      new Date(serviceRequest.walkthroughDate),
       'MMMM dd, yyyy',
     );
 
@@ -222,8 +226,10 @@ export class MailingService {
       requestId: serviceRequest.id,
       serviceName: serviceRequest.service?.name || 'Service',
       propertyName: serviceRequest.property?.name || 'Property',
-      scheduledDate: formattedDate,
+      scheduledDate: scheduledFormattedDate,
       scheduledTime: serviceRequest.scheduledTime,
+      walkthroughDate: walkthroughFormattedDate,
+      walkthroughTime: serviceRequest.walkthroughTime,
       confirmedPrice: Number(serviceRequest.estimatedPrice || 0).toFixed(2),
       isRecurring: serviceRequest.isRecurring,
       recurrenceFrequency: serviceRequest.recurrenceFrequency,
@@ -250,8 +256,12 @@ export class MailingService {
     },
     assignedStaff?: string,
   ) {
-    const formattedDate = format(
+    const scheduledFormattedDate = format(
       new Date(serviceRequest.scheduledDate),
+      'MMMM dd, yyyy',
+    );
+    const walkthroughFormattedDate = format(
+      new Date(serviceRequest.walkthroughDate),
       'MMMM dd, yyyy',
     );
 
@@ -261,8 +271,10 @@ export class MailingService {
       serviceName: serviceRequest.service?.name || 'Service',
       propertyName: serviceRequest.property?.name || 'Property',
       propertyAddress: serviceRequest.property?.address || 'N/A',
-      scheduledDate: formattedDate,
+      scheduledDate: scheduledFormattedDate,
       scheduledTime: serviceRequest.scheduledTime,
+      walkthroughDate: walkthroughFormattedDate,
+      walkthroughTime: serviceRequest.walkthroughTime,
       estimatedDuration: serviceRequest.estimatedDurationMinutes || 60,
       confirmedPrice: Number(serviceRequest.estimatedPrice || 0).toFixed(2),
       isRecurring: serviceRequest.isRecurring,
