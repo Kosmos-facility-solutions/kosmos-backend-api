@@ -2,6 +2,7 @@
 import { config } from '@config/index';
 import { Logger } from '@core/logger/Logger';
 import { Plain } from '@libraries/baseModel.entity';
+import { Payment } from '@modules/payment/entities/payment.entity';
 import { ROLES } from '@modules/role/enums/roles.enum';
 import { RoleRepository } from '@modules/role/role.repository';
 import { ServiceRequest } from '@modules/serviceRequest/entities/serviceRequest.entity';
@@ -366,5 +367,113 @@ export class MailingService {
     );
 
     this.logger.info(`Employee welcome email sent to: ${employee.email}`);
+  }
+
+  async sendPaymentLinkEmail(payment: Payment) {
+    if (!payment?.user?.email) {
+      this.logger.warn('Payment link email skipped: missing user email');
+      return;
+    }
+
+    const context = {
+      customerName: payment.user.firstName || 'Customer',
+      amount: Number(payment.amount || 0).toFixed(2),
+      currency: payment.currency || 'USD',
+      description: payment.description || 'Pending service payment with Kosmos',
+      paymentUrl:
+        payment.paymentUrl || config.paymentGateway?.checkoutUrl || '',
+      reference: payment.reference,
+      propertyName:
+        payment.serviceRequest?.property?.name ||
+        payment.contract?.property?.name ||
+        'Property',
+      serviceName:
+        payment.serviceRequest?.service?.name ||
+        payment.contract?.serviceRequest?.service?.name ||
+        'Service',
+      dueDate: payment.contract?.nextPaymentDue
+        ? format(new Date(payment.contract.nextPaymentDue), 'MMMM dd, yyyy')
+        : null,
+      dashboardUrl: `${config.urls.baseFrontEndURL}/dashboard`,
+    };
+
+    await this.sendEmail(
+      payment.user.email,
+      'Complete Your Kosmos Payment',
+      'payment_link',
+      context,
+    );
+  }
+
+  async sendPaymentReceiptEmail(payment: Payment) {
+    if (!payment?.user?.email) {
+      this.logger.warn('Payment receipt email skipped: missing user email');
+      return;
+    }
+
+    const paidDate = payment.paidAt
+      ? format(new Date(payment.paidAt), 'MMMM dd, yyyy')
+      : format(new Date(), 'MMMM dd, yyyy');
+
+    const context = {
+      customerName: payment.user.firstName || 'Customer',
+      amount: Number(payment.amount || 0).toFixed(2),
+      currency: payment.currency || 'USD',
+      reference: payment.reference,
+      receiptUrl: payment.receiptUrl,
+      paidAt: paidDate,
+      description:
+        payment.description ||
+        'Payment registered with Kosmos Facility Solutions',
+      serviceName:
+        payment.serviceRequest?.service?.name ||
+        payment.contract?.serviceRequest?.service?.name ||
+        'Service',
+      propertyName:
+        payment.serviceRequest?.property?.name ||
+        payment.contract?.property?.name ||
+        'Property',
+      propertyAddress:
+        payment.serviceRequest?.property?.address ||
+        payment.contract?.property?.address ||
+        'N/A',
+      dashboardUrl: `${config.urls.baseFrontEndURL}/dashboard`,
+    };
+
+    await this.sendEmail(
+      payment.user.email,
+      'Payment Received - Kosmos Facility Solutions',
+      'payment_receipt',
+      context,
+    );
+  }
+
+  async sendPaymentFailedEmail(payment: Payment, reason?: string) {
+    if (!payment?.user?.email) {
+      this.logger.warn('Payment failure email skipped: missing user email');
+      return;
+    }
+
+    const context = {
+      customerName: payment.user.firstName || 'Customer',
+      amount: Number(payment.amount || 0).toFixed(2),
+      currency: payment.currency || 'USD',
+      reference: payment.reference,
+      description:
+        payment.description || 'Payment for upcoming service with Kosmos',
+      failureReason:
+        reason ||
+        payment.failureReason ||
+        'The payment was declined by the processor.',
+      retryUrl: payment.paymentUrl || config.paymentGateway?.checkoutUrl || '',
+      supportEmail: config.adminEmail,
+    };
+
+    await this.sendEmail(
+      payment.user.email,
+      'Payment Could Not Be Processed',
+      'payment_failed',
+      context,
+    );
   }
 }

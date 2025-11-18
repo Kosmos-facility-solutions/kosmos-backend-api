@@ -4,6 +4,7 @@ import { PropertyModule } from '@modules/property/property.module';
 import { ServiceModule } from '@modules/service/service.module';
 import { ServiceReportModule } from '@modules/serviceReport/serviceReport.module';
 import { ServiceRequestModule } from '@modules/serviceRequest/serviceRequest.module';
+import { PaymentModule } from '@modules/payment/payment.module';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -22,6 +23,7 @@ import { UserModule } from './modules/user/user.module';
     ServiceRequestModule,
     ServiceReportModule,
     ContractModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

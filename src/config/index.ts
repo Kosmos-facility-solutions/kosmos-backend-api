@@ -3,6 +3,9 @@ import path from 'path';
 import { Dialect } from 'sequelize';
 dotenv.config();
 
+const baseFrontEndUrl =
+  process.env.BASE_FRONTEND_URL || 'https://kosmos-frontend.onrender.com';
+
 let dbConfig;
 if (process.env.DATABASE_URL) {
   // Parse the DATABASE_URL
@@ -84,8 +87,7 @@ export const config = {
     apiRoot: process.env.URLS_API_ROOT || '',
     base: '',
     baseApi: '',
-    baseFrontEndURL:
-      process.env.BASE_FRONTEND_URL || 'https://kosmos-frontend.onrender.com',
+    baseFrontEndURL: baseFrontEndUrl,
   },
   jwt: {
     secret: process.env.JWT_SECRET || 'USE A REAL SECRET VALUE',
@@ -152,6 +154,20 @@ export const config = {
     fail: {
       redirect: process.env.OAUTH_FAIL_REDIRECT,
     },
+  },
+  paymentGateway: {
+    provider: process.env.PAYMENT_GATEWAY_PROVIDER || 'stripe',
+    currency: process.env.PAYMENT_GATEWAY_CURRENCY || 'USD',
+    successUrl:
+      process.env.PAYMENT_GATEWAY_SUCCESS_URL ||
+      `${baseFrontEndUrl}/payments/success`,
+    cancelUrl:
+      process.env.PAYMENT_GATEWAY_CANCEL_URL ||
+      `${baseFrontEndUrl}/payments/cancel`,
+    checkoutUrl:
+      process.env.PAYMENT_GATEWAY_CHECKOUT_URL ||
+      `${baseFrontEndUrl}/payments/checkout`,
+    webhookSecret: process.env.PAYMENT_GATEWAY_WEBHOOK_SECRET || '',
   },
   test: {
     db: {

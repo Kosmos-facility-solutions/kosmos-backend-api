@@ -1,0 +1,219 @@
+<table
+  border="0"
+  cellpadding="0"
+  cellspacing="0"
+  width="600"
+  id="templateBody"
+  style="background-color: #f8f9fa"
+>
+  <tr>
+    <td valign="top" class="bodyContainer">
+      <!-- Header with Logo -->
+      <table
+        border="0"
+        cellpadding="0"
+        cellspacing="0"
+        width="100%"
+        style="
+          background-color: #ffffff;
+          padding: 40px 0;
+          border-bottom: 1px solid #e9ecef;
+        "
+      >
+        <tr>
+          <td align="center">
+            <h1
+              style="
+                color: #1a2332;
+                font-family:
+                  -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial,
+                  sans-serif;
+                font-size: 26px;
+                margin: 0;
+                font-weight: 700;
+                letter-spacing: -0.5px;
+              "
+            >
+              <span style="color: #0066ff">KOSMOS</span> FACILITY SOLUTIONS
+            </h1>
+            <p
+              style="
+                color: #6c757d;
+                font-family:
+                  -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial,
+                  sans-serif;
+                font-size: 13px;
+                margin: 8px 0 0 0;
+                font-weight: 400;
+              "
+            >
+              We clean it like it's our own house.
+            </p>
+          </td>
+        </tr>
+      </table>
+      <table
+        border="0"
+        cellpadding="0"
+        cellspacing="0"
+        width="600"
+        id="templateBody"
+        style="background-color: #f8f9fa"
+      >
+        <tr>
+          <td valign="top" class="bodyContainer">
+            <table
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              width="100%"
+              style="background-color: #ffffff; padding: 40px 45px"
+            >
+              <tr>
+                <td>
+                  <h2
+                    style="
+                      color: #d93025;
+                      font-family:
+                        -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial,
+                        sans-serif;
+                      font-size: 26px;
+                      margin: 0 0 15px;
+                      font-weight: 600;
+                    "
+                  >
+                    We couldn't process your payment
+                  </h2>
+                  <p
+                    style="
+                      color: #495057;
+                      font-family:
+                        -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial,
+                        sans-serif;
+                      font-size: 16px;
+                      line-height: 1.7;
+                      margin: 0 0 25px;
+                    "
+                  >
+                    Hi <strong><%= customerName %></strong>,<br />
+                    Unfortunately the last attempt to process your payment for
+                    <strong><%= description %></strong> was declined by the
+                    processor.
+                  </p>
+
+                  <table
+                    border="0"
+                    cellpadding="0"
+                    cellspacing="0"
+                    width="100%"
+                    style="
+                      background: #fff5f5;
+                      border-radius: 10px;
+                      padding: 22px;
+                      margin-bottom: 25px;
+                    "
+                  >
+                    <tr>
+                      <td>
+                        <p
+                          style="
+                            margin: 0;
+                            font-family:
+                              -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                              Arial, sans-serif;
+                            color: #d93025;
+                            font-size: 13px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                          "
+                        >
+                          Attempted payment
+                        </p>
+                        <h3
+                          style="
+                            margin: 6px 0 0;
+                            font-family:
+                              -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                              Arial, sans-serif;
+                            color: #1a2332;
+                            font-size: 23px;
+                          "
+                        >
+                          <%= currency %> $<%= amount %>
+                        </h3>
+                        <p
+                          style="
+                            margin: 8px 0 0;
+                            font-family:
+                              -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                              Arial, sans-serif;
+                            color: #6c757d;
+                            font-size: 14px;
+                          "
+                        >
+                          Reference: <strong><%= reference %></strong>
+                        </p>
+                        <p
+                          style="
+                            margin: 12px 0 0;
+                            font-family:
+                              -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                              Arial, sans-serif;
+                            color: #495057;
+                            font-size: 14px;
+                          "
+                        >
+                          Reason: <%= failureReason %>
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <p style="text-align: center; margin-bottom: 30px">
+                    <a
+                      href="<%= retryUrl %>"
+                      style="
+                        background: #0066ff;
+                        color: #ffffff;
+                        font-family:
+                          -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial,
+                          sans-serif;
+                        text-decoration: none;
+                        padding: 13px 28px;
+                        border-radius: 8px;
+                        font-size: 15px;
+                        display: inline-block;
+                      "
+                    >
+                      Try again
+                    </a>
+                  </p>
+
+                  <p
+                    style="
+                      color: #6c757d;
+                      font-family:
+                        -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial,
+                        sans-serif;
+                      font-size: 13px;
+                      line-height: 1.7;
+                      margin: 0;
+                    "
+                  >
+                    If the issue persists, feel free to reply to this email or
+                    contact us at
+                    <a
+                      href="mailto:<%= supportEmail %>"
+                      style="color: #0066ff; text-decoration: none"
+                      ><%= supportEmail %></a
+                    >. We're here to help.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
