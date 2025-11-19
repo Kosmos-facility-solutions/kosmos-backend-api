@@ -22,7 +22,6 @@ import {
 import { IncludeOptions, OrderItem } from 'sequelize';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { PaymentResponseDto } from './dto/payment-response.dto';
-import { PaymentWebhookDto } from './dto/payment-webhook.dto';
 import {
   Payment,
   PaymentProvider,
@@ -126,7 +125,7 @@ export class PaymentService {
       },
       paymentUrl: session.paymentUrl,
       providerPaymentId: session.providerPaymentId,
-      providerCustomerId: null,
+      providerCustomerId: session.providerCustomerId || null,
       expiresAt: session.expiresAt,
     });
 
@@ -191,21 +190,45 @@ export class PaymentService {
     return PaymentResponseDto.fromPayment(payment) as PaymentResponseDto;
   }
 
-  async handleWebhook(webhookDto: PaymentWebhookDto) {
-    const verified = await this.paymentGatewayService.verifyWebhookSignature(
-      webhookDto.rawBody || JSON.stringify(webhookDto),
-      webhookDto.signature,
-    );
+  async handleWebhook(rawBody: Buffer | string, signature: string) {
+    let event: PaymentGatewayWebhookEvent;
+    let stripeEventType: string = null;
+    try {
+      const stripeEvent = this.paymentGatewayService.constructEventFromWebhook(
+        rawBody,
+        signature,
+      );
+      stripeEventType = stripeEvent.type;
+      const parsedEvent =
+        this.paymentGatewayService.parseWebhookEvent(stripeEvent);
 
-    if (!verified) {
-      throw new UnauthorizedException('Invalid webhook signature');
+      if (!parsedEvent) {
+        this.logger.debug(
+          `No payment mapping for Stripe event ${stripeEvent.type}.`,
+        );
+        return { ignored: true };
+      }
+
+      event = parsedEvent;
+    } catch (error) {
+      this.logger.error(`Failed to parse Stripe webhook event: ${error}`);
+      throw new UnauthorizedException('Invalid webhook payload');
     }
 
-    const payment = await this.paymentRepository.findByProviderPaymentId(
-      webhookDto.providerPaymentId,
-    );
-
-    const event = this.paymentGatewayService.parseWebhookEvent(webhookDto);
+    let payment: Payment;
+    try {
+      payment = await this.paymentRepository.findByProviderPaymentId(
+        event.providerPaymentId,
+      );
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        this.logger.warn(
+          `Payment not found for providerPaymentId ${event.providerPaymentId} (event: ${stripeEventType})`,
+        );
+        return { ignored: true };
+      }
+      throw error;
+    }
 
     const updatePayload: Partial<Payment> = {
       status: event.status,
@@ -238,6 +261,10 @@ export class PaymentService {
 
     if (event.currency) {
       updatePayload.currency = event.currency;
+    }
+
+    if (event.providerCustomerId) {
+      updatePayload.providerCustomerId = event.providerCustomerId;
     }
 
     const updatedPayment = await this.paymentRepository.update(

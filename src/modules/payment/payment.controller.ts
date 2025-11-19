@@ -5,14 +5,18 @@ import { ValidateJWT } from '@modules/auth/decorators/validateJWT.decorator';
 import { IsRole } from '@modules/auth/decorators/isRole.decorator';
 import { ROLES } from '@modules/role/enums/roles.enum';
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
+  Headers,
   HttpCode,
   Param,
   ParseIntPipe,
   Post,
   Query,
+  Req,
+  RawBodyRequest,
 } from '@nestjs/common';
 import { ApiExtraModels, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ParseAttributesPipe } from '@pipes/parseAttributes.pipe';
@@ -30,9 +34,9 @@ import { ApiQueryWhere } from '@swagger/parameters/where.decorator';
 import { ApiCommonResponses } from '@swagger/utils/commonResponses.decorator';
 import { ApiQueryPagination } from '@swagger/utils/pagination.decorator';
 import { IncludeOptions, OrderItem } from 'sequelize';
+import { Request } from 'express';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { PaymentResponseDto } from './dto/payment-response.dto';
-import { PaymentWebhookDto } from './dto/payment-webhook.dto';
 import { Payment } from './entities/payment.entity';
 import { PaymentService } from './payment.service';
 
@@ -107,7 +111,17 @@ export class PaymentController {
   @ApiOperation({ summary: 'Receive payment webhook events' })
   @HttpCode(200)
   @Post('webhook')
-  async handleWebhook(@Body() webhookDto: PaymentWebhookDto) {
-    return await this.paymentService.handleWebhook(webhookDto);
+  async handleWebhook(
+    @Req() req: RawBodyRequest<Request>,
+    @Headers('stripe-signature') signature: string,
+  ) {
+    if (!req.rawBody) {
+      throw new BadRequestException('Missing raw request body.');
+    }
+    if (!signature) {
+      throw new BadRequestException('Missing stripe-signature header.');
+    }
+
+    return await this.paymentService.handleWebhook(req.rawBody, signature);
   }
 }

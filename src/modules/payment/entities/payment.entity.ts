@@ -117,13 +117,13 @@ export class Payment extends BaseModel<Payment> {
   metadata: Record<string, unknown>;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.TEXT,
     allowNull: true,
   })
   paymentUrl: string;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.TEXT,
     allowNull: true,
   })
   receiptUrl: string;
