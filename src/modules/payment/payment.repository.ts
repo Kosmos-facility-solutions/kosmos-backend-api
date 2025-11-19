@@ -1,9 +1,9 @@
 import { SequelizeCrudRepository } from '@libraries/SequelizeCrudRepository';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Includeable, Transaction } from 'sequelize';
+import { Includeable, Transaction, Op } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
-import { Payment } from './entities/payment.entity';
+import { Payment, PaymentStatus } from './entities/payment.entity';
 
 @Injectable()
 export class PaymentRepository extends SequelizeCrudRepository<Payment> {
@@ -49,5 +49,32 @@ export class PaymentRepository extends SequelizeCrudRepository<Payment> {
       },
     ];
     return await this.findOneById(id, include, null, transaction);
+  }
+
+  async hasActivePaymentForContract(
+    contractId: number,
+    transaction?: Transaction,
+  ): Promise<boolean> {
+    const activeStatuses = [
+      PaymentStatus.Pending,
+      PaymentStatus.RequiresAction,
+      PaymentStatus.Processing,
+    ];
+
+    const payments = await this.findAll(
+      {
+        where: {
+          contractId,
+          status: {
+            [Op.in]: activeStatuses,
+          },
+        },
+        limit: 1,
+        order: [['createdAt', 'DESC']],
+      },
+      transaction,
+    );
+
+    return payments.length > 0;
   }
 }

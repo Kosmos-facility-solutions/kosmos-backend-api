@@ -6,6 +6,7 @@ import { UserModule } from '@modules/user/user.module';
 import { Payment } from './entities/payment.entity';
 import { PaymentController } from './payment.controller';
 import { PaymentGatewayService } from './payment-gateway.service';
+import { PaymentReminderService } from './payment-reminder.service';
 import { PaymentRepository } from './payment.repository';
 import { PaymentService } from './payment.service';
 
@@ -17,7 +18,12 @@ import { PaymentService } from './payment.service';
     UserModule,
   ],
   controllers: [PaymentController],
-  providers: [PaymentService, PaymentRepository, PaymentGatewayService],
+  providers: [
+    PaymentService,
+    PaymentRepository,
+    PaymentGatewayService,
+    PaymentReminderService,
+  ],
   exports: [SequelizeModule, PaymentService, PaymentRepository],
 })
 export class PaymentModule {}

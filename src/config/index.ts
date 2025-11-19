@@ -158,7 +158,13 @@ export const config = {
   paymentGateway: {
     provider: process.env.PAYMENT_GATEWAY_PROVIDER || 'stripe',
     currency: process.env.PAYMENT_GATEWAY_CURRENCY || 'USD',
-    secretKey: process.env.PAYMENT_GATEWAY_SECRET_KEY || '',
+    secretKey:
+      process.env.PAYMENT_GATEWAY_SECRET_KEY ||
+      process.env.STRIPE_SECRET_KEY ||
+      '',
+    reminderDays: process.env.PAYMENT_REMINDER_LEAD_DAYS
+      ? parseInt(process.env.PAYMENT_REMINDER_LEAD_DAYS)
+      : 7,
     successUrl:
       process.env.PAYMENT_GATEWAY_SUCCESS_URL ||
       `${baseFrontEndUrl}/payments/success`,

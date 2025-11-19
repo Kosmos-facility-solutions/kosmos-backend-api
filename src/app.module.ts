@@ -6,6 +6,7 @@ import { ServiceReportModule } from '@modules/serviceReport/serviceReport.module
 import { ServiceRequestModule } from '@modules/serviceRequest/serviceRequest.module';
 import { PaymentModule } from '@modules/payment/payment.module';
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './core/database/database';
@@ -15,6 +16,7 @@ import { UserModule } from './modules/user/user.module';
 @Module({
   imports: [
     DatabaseModule,
+    ScheduleModule.forRoot(),
     EmailModule,
     UserModule,
     AuthModule,

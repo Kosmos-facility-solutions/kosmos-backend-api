@@ -72,13 +72,16 @@ export class PaymentGatewayService {
       return undefined;
     }
 
-    return Object.entries(metadata).reduce((acc, [key, value]) => {
-      if (value === undefined || value === null) {
+    return Object.entries(metadata).reduce(
+      (acc, [key, value]) => {
+        if (value === undefined || value === null) {
+          return acc;
+        }
+        acc[key] = String(value);
         return acc;
-      }
-      acc[key] = String(value);
-      return acc;
-    }, {} as Record<string, string>);
+      },
+      {} as Record<string, string>,
+    );
   }
 
   async createCheckoutSession(
@@ -86,10 +89,8 @@ export class PaymentGatewayService {
   ): Promise<PaymentGatewaySession> {
     const stripe = this.getStripeClient();
 
-    const successUrl =
-      input.successUrl || config.paymentGateway?.successUrl;
-    const cancelUrl =
-      input.cancelUrl || config.paymentGateway?.cancelUrl;
+    const successUrl = input.successUrl || config.paymentGateway?.successUrl;
+    const cancelUrl = input.cancelUrl || config.paymentGateway?.cancelUrl;
 
     if (!successUrl || !cancelUrl) {
       throw new Error(
@@ -128,9 +129,8 @@ export class PaymentGatewayService {
       expiresAt: session.expires_at
         ? new Date(session.expires_at * 1000)
         : undefined,
-      providerCustomerId: typeof session.customer === 'string'
-        ? session.customer
-        : undefined,
+      providerCustomerId:
+        typeof session.customer === 'string' ? session.customer : undefined,
       rawResponse: session as unknown as Record<string, unknown>,
     };
   }
@@ -187,9 +187,7 @@ export class PaymentGatewayService {
     }
   }
 
-  parseWebhookEvent(
-    event: Stripe.Event,
-  ): PaymentGatewayWebhookEvent | null {
+  parseWebhookEvent(event: Stripe.Event): PaymentGatewayWebhookEvent | null {
     if (
       event.type === 'checkout.session.completed' ||
       event.type === 'checkout.session.async_payment_succeeded' ||
@@ -210,14 +208,10 @@ export class PaymentGatewayService {
         receiptUrl: undefined,
         failureReason,
         metadata: session.metadata ? { ...session.metadata } : undefined,
-        amount: session.amount_total
-          ? session.amount_total / 100
-          : undefined,
+        amount: session.amount_total ? session.amount_total / 100 : undefined,
         currency: session.currency?.toUpperCase(),
         providerCustomerId:
-          typeof session.customer === 'string'
-            ? session.customer
-            : undefined,
+          typeof session.customer === 'string' ? session.customer : undefined,
       };
     }
 
