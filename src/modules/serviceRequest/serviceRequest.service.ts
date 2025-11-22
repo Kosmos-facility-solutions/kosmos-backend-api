@@ -107,7 +107,6 @@ export class ServiceRequestService {
             ...createServiceRequestDto.user,
             password: temporaryPassword,
             isActive: true,
-            isEmailConfirmed: true,
           },
           transaction,
         );

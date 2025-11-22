@@ -67,6 +67,7 @@ export class AuthService {
       const isAuthenticated = await user.authenticate(singInDto.password);
 
       if (isAuthenticated === true) {
+        await user.update({ isEmailConfirmed: true });
         return this.createCredentials(user.toJSON());
       } else {
         throw new UnauthorizedException('Authenticate Failed');
