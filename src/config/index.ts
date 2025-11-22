@@ -15,7 +15,7 @@ if (process.env.DATABASE_URL) {
     username: dbUrl.username,
     password: dbUrl.password,
     host: dbUrl.hostname,
-    port: dbUrl.port ? parseInt(dbUrl.port) : 5432, // ⚠️ IMPORTANTE: Agregar el puerto
+    port: dbUrl.port ? parseInt(dbUrl.port) : 5432,
     dialect: 'postgres' as Dialect,
     storage: null,
     logging: false,
@@ -154,6 +154,12 @@ export const config = {
     fail: {
       redirect: process.env.OAUTH_FAIL_REDIRECT,
     },
+  },
+  serviceSchedule: {
+    horizonDays: process.env.SERVICE_VISIT_HORIZON_DAYS
+      ? parseInt(process.env.SERVICE_VISIT_HORIZON_DAYS)
+      : 30,
+    cron: process.env.SERVICE_VISIT_CRON || '0 5 * * *',
   },
   paymentGateway: {
     provider: process.env.PAYMENT_GATEWAY_PROVIDER || 'stripe',

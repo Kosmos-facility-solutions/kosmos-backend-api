@@ -5,6 +5,7 @@ import { ServiceModule } from '@modules/service/service.module';
 import { ServiceReportModule } from '@modules/serviceReport/serviceReport.module';
 import { ServiceRequestModule } from '@modules/serviceRequest/serviceRequest.module';
 import { PaymentModule } from '@modules/payment/payment.module';
+import { ServiceVisitModule } from '@modules/serviceVisit/serviceVisit.module';
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
@@ -26,6 +27,7 @@ import { UserModule } from './modules/user/user.module';
     ServiceReportModule,
     ContractModule,
     PaymentModule,
+    ServiceVisitModule,
   ],
   controllers: [AppController],
   providers: [AppService],
