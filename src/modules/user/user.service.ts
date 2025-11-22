@@ -83,4 +83,11 @@ export class UserService {
   async remove(id: number) {
     return await this.userRepository.delete(id);
   }
+
+  async deactivate(id: number) {
+    const user = await this.userRepository.update(id, {
+      isActive: false,
+    });
+    return UserResponseDto.fromUser(user);
+  }
 }

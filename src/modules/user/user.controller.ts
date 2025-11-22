@@ -155,4 +155,14 @@ export class UserController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.userService.remove(+id);
   }
+
+  @ApiOperation({ summary: 'Deactivate user (soft delete)' })
+  @ApiCommonResponses()
+  @ApiOkResponseData(UserResponseDto)
+  @IsSelfUserOrIsRole(ROLES.ADMIN)
+  @ValidateJWT()
+  @Patch(':id/deactivate')
+  async deactivate(@Param('id', ParseIntPipe) id: number) {
+    return await this.userService.deactivate(+id);
+  }
 }
