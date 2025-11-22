@@ -1,21 +1,27 @@
 // create-service-request-demo-quote.dto.ts
 import { CreatePropertyDto } from '@modules/property/dto/create-property.dto';
 import { CreateUserDto } from '@modules/user/dto/create-user.dto';
+import { OmitType } from '@nestjs/mapped-types';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, ValidateNested } from 'class-validator';
 import { CreateServiceRequestDto } from './create-service-request.dto';
 
+export class CreateDemoQuoteServiceRequestDto extends OmitType(
+  CreateServiceRequestDto,
+  ['propertyId'] as const,
+) {}
+
 export class CreateServiceRequestDemoQuoteDto {
   // Service Request nested validation
   @ApiProperty({
-    type: () => CreateServiceRequestDto,
+    type: () => CreateDemoQuoteServiceRequestDto,
     description: 'Service request information',
   })
   @IsNotEmpty()
   @ValidateNested()
-  @Type(() => CreateServiceRequestDto)
-  serviceRequest: CreateServiceRequestDto;
+  @Type(() => CreateDemoQuoteServiceRequestDto)
+  serviceRequest: CreateDemoQuoteServiceRequestDto;
 
   // User nested validation
   @ApiProperty({
