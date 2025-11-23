@@ -163,6 +163,7 @@ export class ServiceRequestService {
 
       // Commit transaction
       await transaction.commit();
+      transaction = null;
 
       const role = await Role.findOne({ where: { name: ROLES.USER } });
       await UserRole.create({ userId: user.id, roleId: role.id });
@@ -174,12 +175,16 @@ export class ServiceRequestService {
           { association: 'service' },
           { association: 'property' },
         ]);
-      await this.mailingService.sendServiceRequestAdminEmail(
-        fullServiceRequest,
-      );
-      await this.mailingService.sendServiceRequestCustomerEmail(
-        fullServiceRequest,
-      );
+      try {
+        await this.mailingService.sendServiceRequestAdminEmail(
+          fullServiceRequest,
+        );
+        await this.mailingService.sendServiceRequestCustomerEmail(
+          fullServiceRequest,
+        );
+      } catch (emailError) {
+        this.logger.error('Error sending demo quote emails', emailError);
+      }
 
       return serviceRequest;
     } catch (error) {
@@ -322,11 +327,15 @@ export class ServiceRequestService {
     // 4. Determine if this is a new customer
     const isNewCustomer = !fullServiceRequest.user.isEmailConfirmed;
 
+    let assignedStaffName: string = null;
+    if (approveDto.assignedStaffId) {
+      assignedStaffName = 'Service Team';
+    }
+
     try {
       if (isNewCustomer) {
         const temporaryPassword = generateTemporaryPassword();
 
-        // Check if user already exists
         const user = await this.userRepository.findOneByEmail(
           fullServiceRequest.user?.email,
         );
@@ -339,125 +348,142 @@ export class ServiceRequestService {
 
         this.logger.log(`New customer account confirmed: ${user.email}`);
 
-        // Send welcome email with credentials
         await this.mailingService.sendServiceApprovedNewCustomerEmail(
           fullServiceRequest,
           temporaryPassword,
         );
 
         this.logger.log(`Welcome email sent to new customer: ${user.email}`);
-      } else {
-        let assignedStaffName = null;
-
-        // Get assigned staff name if provided
-        if (approveDto.assignedStaffId) {
-          // Fetch staff details - adjust this based on your Staff model
-          // const staff = await this.staffService.findOne(approveDto.assignedStaffId);
-          // assignedStaffName = `${staff.firstName} ${staff.lastName}`;
-
-          // For now, you can pass a placeholder or fetch it
-          assignedStaffName = 'Service Team'; // Replace with actual staff lookup
-        }
-
-        // 4. CREATE CONTRACT AUTOMATICALLY 🎯
-        try {
-          // Determine payment frequency based on service frequency
-          let paymentFrequency: PaymentFrequency;
-          switch (fullServiceRequest.recurrenceFrequency) {
-            case RecurrenceFrequency.Weekly:
-              paymentFrequency = PaymentFrequency.Weekly;
-              break;
-            case RecurrenceFrequency.BiWeekly:
-              paymentFrequency = PaymentFrequency.BiWeekly;
-              break;
-            case RecurrenceFrequency.Monthly:
-              paymentFrequency = PaymentFrequency.Monthly;
-              break;
-            case RecurrenceFrequency.Quarterly:
-              paymentFrequency = PaymentFrequency.Quarterly;
-              break;
-            default:
-              paymentFrequency = PaymentFrequency.OneTime;
-          }
-
-          // Calculate contract dates
-          const startDate = new Date(fullServiceRequest.scheduledDate);
-          let endDate = null;
-
-          if (fullServiceRequest.recurrenceEndDate) {
-            endDate = new Date(fullServiceRequest.recurrenceEndDate);
-          } else if (fullServiceRequest.isRecurring) {
-            // Default: 1 year contract for recurring services
-            endDate = new Date(startDate);
-            endDate.setFullYear(endDate.getFullYear() + 1);
-          }
-
-          // Calculate next payment due date (7 days from start for first payment)
-          const nextPaymentDue = new Date(startDate);
-          nextPaymentDue.setDate(nextPaymentDue.getDate() + 7);
-
-          // Create contract
-          const contractData = {
-            clientId: fullServiceRequest.userId,
-            serviceRequestId: fullServiceRequest.id,
-            propertyId: fullServiceRequest.propertyId,
-            startDate: startDate.toISOString().split('T')[0],
-            endDate: endDate ? endDate.toISOString().split('T')[0] : null,
-            paymentAmount: Number(fullServiceRequest.estimatedPrice),
-            paymentFrequency,
-            nextPaymentDue: nextPaymentDue.toISOString().split('T')[0],
-            serviceFrequency: fullServiceRequest.recurrenceFrequency,
-            workStartTime: fullServiceRequest.scheduledTime,
-            workEndTime: new Date(
-              new Date(fullServiceRequest.scheduledTime).getTime() +
-                8 * 60 * 60 * 1000,
-            ).toISOString(),
-            status: ContractStatus.Active,
-            scope:
-              fullServiceRequest.specialInstructions ||
-              `${fullServiceRequest.service?.name} service`,
-            notes:
-              approveDto.adminNotes ||
-              'Contract created from approved service request',
-            estimatedDurationMinutes:
-              fullServiceRequest.estimatedDurationMinutes,
-            isActive: true,
-          };
-
-          const contract: ContractResponseDto =
-            await this.contractService.create(contractData);
-
-          this.logger.log(
-            `Contract ${contract.contractNumber} created for ServiceRequest #${id}`,
-          );
-          try {
-            await this.contractService.sendContractEmailWithPdf(contract.id);
-
-            this.logger.log(
-              `Contract PDF email sent for Contract #${contract.contractNumber}`,
-            );
-          } catch (pdfError) {
-            this.logger.error('Error sending contract PDF email: ', pdfError);
-          }
-        } catch (error) {
-          this.logger.error('Error creating contract:', error);
-        }
-
-        // 5. Send approval email to existing customer
-        await this.mailingService.sendServiceApprovedExistingCustomerEmail(
-          fullServiceRequest,
-          assignedStaffName,
-        );
-
-        this.logger.log(
-          `Approval email sent to existing customer: ${fullServiceRequest.user?.email}`,
-        );
       }
     } catch (error) {
       this.logger.error('Failed to send approval email:', error);
       throw error;
     }
 
+    const contract = await this.createContractFromServiceRequest(
+      fullServiceRequest,
+      approveDto,
+      id,
+    );
+
+    if (!isNewCustomer) {
+      await this.mailingService.sendServiceApprovedExistingCustomerEmail(
+        fullServiceRequest,
+        assignedStaffName,
+      );
+
+      this.logger.log(
+        `Approval email sent to existing customer: ${fullServiceRequest.user?.email}`,
+      );
+    }
+
     return fullServiceRequest;
+  }
+
+  private async createContractFromServiceRequest(
+    fullServiceRequest: ServiceRequest,
+    approveDto: ApproveServiceRequestDto,
+    serviceRequestId: number,
+  ): Promise<ContractResponseDto> {
+    try {
+      let paymentFrequency: PaymentFrequency;
+      switch (fullServiceRequest.recurrenceFrequency) {
+        case RecurrenceFrequency.Weekly:
+          paymentFrequency = PaymentFrequency.Weekly;
+          break;
+        case RecurrenceFrequency.BiWeekly:
+          paymentFrequency = PaymentFrequency.BiWeekly;
+          break;
+        case RecurrenceFrequency.Monthly:
+          paymentFrequency = PaymentFrequency.Monthly;
+          break;
+        case RecurrenceFrequency.Quarterly:
+          paymentFrequency = PaymentFrequency.Quarterly;
+          break;
+        default:
+          paymentFrequency = PaymentFrequency.OneTime;
+      }
+
+      const startDate = new Date(fullServiceRequest.scheduledDate);
+      let endDate = null;
+
+      if (fullServiceRequest.recurrenceEndDate) {
+        endDate = new Date(fullServiceRequest.recurrenceEndDate);
+      } else if (fullServiceRequest.isRecurring) {
+        endDate = new Date(startDate);
+        endDate.setFullYear(endDate.getFullYear() + 1);
+      }
+
+      const nextPaymentDue = new Date(startDate);
+      nextPaymentDue.setDate(nextPaymentDue.getDate() + 7);
+
+      const contractData = {
+        clientId: fullServiceRequest.userId,
+        serviceRequestId: fullServiceRequest.id,
+        propertyId: fullServiceRequest.propertyId,
+        startDate: startDate.toISOString().split('T')[0],
+        endDate: endDate ? endDate.toISOString().split('T')[0] : null,
+        paymentAmount: Number(fullServiceRequest.estimatedPrice),
+        paymentFrequency,
+        nextPaymentDue: nextPaymentDue.toISOString().split('T')[0],
+        serviceFrequency: fullServiceRequest.recurrenceFrequency,
+        workStartTime: this.normalizeTime(fullServiceRequest.scheduledTime),
+        workEndTime: this.normalizeTime(fullServiceRequest.scheduledTime, 8),
+        status: ContractStatus.Active,
+        scope:
+          fullServiceRequest.specialInstructions ||
+          `${fullServiceRequest.service?.name} service`,
+        notes:
+          approveDto.adminNotes ||
+          'Contract created from approved service request',
+        estimatedDurationMinutes: fullServiceRequest.estimatedDurationMinutes,
+        isActive: true,
+      };
+
+      const contract = await this.contractService.create(contractData);
+
+      this.logger.log(
+        `Contract ${contract.contractNumber} created for ServiceRequest #${serviceRequestId}`,
+      );
+
+      try {
+        await this.contractService.sendContractEmailWithPdf(contract.id);
+        this.logger.log(
+          `Contract PDF email sent for Contract #${contract.contractNumber}`,
+        );
+      } catch (pdfError) {
+        this.logger.error('Error sending contract PDF email: ', pdfError);
+      }
+
+      return contract;
+    } catch (error) {
+      this.logger.error('Error creating contract:', error);
+      throw error;
+    }
+  }
+
+  private normalizeTime(time?: string, hoursToAdd = 0): string {
+    if (!time) {
+      return null;
+    }
+    try {
+      const [hoursPart = '0', minutesPart = '0'] = time.split(':');
+      let hours = parseInt(hoursPart, 10);
+      let minutes = parseInt(minutesPart, 10);
+      if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+        return null;
+      }
+      if (hoursToAdd) {
+        hours = (hours + hoursToAdd) % 24;
+        if (hours < 0) hours += 24;
+      }
+      return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(
+        2,
+        '0',
+      )}`;
+    } catch (error) {
+      this.logger.warn(`Invalid time received (${time}), skipping conversion`);
+      return null;
+    }
   }
 }
