@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { format } from 'date-fns';
 import { IncludeOptions, OrderItem } from 'sequelize';
+import { ContractDocService } from './contract-doc.service';
 import { ContractPdfService } from './contract-pdf.service';
 import { ContractRepository } from './contract.repository';
 import { ContractResponseDto } from './dto/contract-response.dto';
@@ -23,6 +24,7 @@ export class ContractService {
   constructor(
     private contractRepository: ContractRepository,
     private contractPdfService: ContractPdfService,
+    private contractDocService: ContractDocService,
     private mailingService: MailingService,
   ) {}
 
@@ -374,8 +376,59 @@ export class ContractService {
     await this.mailingService.sendContractApprovedEmail(
       contract.client?.email || '',
       emailData,
-      pdfBuffer,
-      `Contract_${contract.contractNumber}.pdf`,
+      {
+        buffer: pdfBuffer,
+        filename: `Contract_${contract.contractNumber}.pdf`,
+        contentType: 'application/pdf',
+      },
+    );
+  }
+
+  async sendContractEmailWithDoc(contractId: number): Promise<void> {
+    const contract = await this.contractRepository.findOneById(contractId, [
+      { association: 'client' },
+      { association: 'property' },
+      {
+        association: 'serviceRequest',
+        include: [{ association: 'service' }],
+      },
+    ]);
+
+    if (!contract) {
+      throw new Error('Contract not found');
+    }
+
+    const docBuffer =
+      await this.contractDocService.generateEditableContract(contract);
+
+    const emailData = {
+      clientName:
+        contract.client?.firstName + ' ' + contract.client.lastName || 'Client',
+      contractNumber: contract.contractNumber,
+      serviceName: contract.serviceRequest?.service?.name || 'Service',
+      startDate: format(new Date(contract.startDate), 'MMMM dd, yyyy'),
+      endDate: contract.endDate
+        ? format(new Date(contract.endDate), 'MMMM dd, yyyy')
+        : null,
+      paymentAmount: String(contract.paymentAmount),
+      paymentFrequency: this.formatPaymentFrequency(contract.paymentFrequency),
+      nextPaymentDue: contract.nextPaymentDue
+        ? format(new Date(contract.nextPaymentDue), 'MMMM dd, yyyy')
+        : null,
+      propertyName: contract.property?.name || 'Property',
+      propertyAddress: contract.property?.address || '',
+      dashboardUrl: `${process.env.FRONTEND_URL}/dashboard/contracts/${contract.id}`,
+    };
+
+    await this.mailingService.sendContractApprovedEmail(
+      contract.client?.email || '',
+      emailData,
+      {
+        buffer: docBuffer,
+        filename: `Contract_${contract.contractNumber}.docx`,
+        contentType:
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      },
     );
   }
 
@@ -397,6 +450,23 @@ export class ContractService {
     }
 
     return await this.contractPdfService.generateContractPdf(contract);
+  }
+
+  async generateContractDocById(contractId: number): Promise<Buffer> {
+    const contract = await this.contractRepository.findOneById(contractId, [
+      { association: 'client' },
+      { association: 'property' },
+      {
+        association: 'serviceRequest',
+        include: [{ association: 'service' }],
+      },
+    ]);
+
+    if (!contract) {
+      throw new Error('Contract not found');
+    }
+
+    return await this.contractDocService.generateEditableContract(contract);
   }
 
   /**

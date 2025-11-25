@@ -312,8 +312,11 @@ export class MailingService {
       propertyAddress: string;
       dashboardUrl: string;
     },
-    pdfBuffer: Buffer,
-    pdfFilename: string,
+    attachment?: {
+      buffer: Buffer;
+      filename: string;
+      contentType: string;
+    },
   ): Promise<void> {
     try {
       const templatePath = path.join(
@@ -324,18 +327,26 @@ export class MailingService {
 
       const html = await ejs.renderFile(templatePath, data);
 
-      await this.emailHttpService.sendWithAttachment(
-        to,
-        `✅ Your Contract is Ready - ${data.contractNumber}`,
-        html,
-        [
-          {
-            filename: pdfFilename,
-            content: pdfBuffer,
-            contentType: 'application/pdf',
-          },
-        ],
-      );
+      if (attachment) {
+        await this.emailHttpService.sendWithAttachment(
+          to,
+          `✅ Your Contract is Ready - ${data.contractNumber}`,
+          html,
+          [
+            {
+              filename: attachment.filename,
+              content: attachment.buffer,
+              contentType: attachment.contentType,
+            },
+          ],
+        );
+      } else {
+        await this.emailHttpService.send(
+          to,
+          `✅ Your Contract is Ready - ${data.contractNumber}`,
+          html,
+        );
+      }
 
       this.logger.info(`Contract email sent successfully to ${to}`);
     } catch (error) {

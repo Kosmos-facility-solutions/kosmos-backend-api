@@ -4,6 +4,7 @@ import { EmailModule } from '@modules/email/email.module'; // ← AGREGAR
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ContractPdfController } from './contract-pdf.controller'; // ← AGREGAR
+import { ContractDocService } from './contract-doc.service';
 import { ContractPdfService } from './contract-pdf.service'; // ← AGREGAR
 import { ContractController } from './contract.controller';
 import { ContractRepository } from './contract.repository';
@@ -16,6 +17,7 @@ import { Contract } from './entities/contract.entity';
   providers: [
     ContractService,
     ContractPdfService,
+    ContractDocService,
     ContractRepository,
     IsRoleGuard,
     IsSelfUserGuard,
