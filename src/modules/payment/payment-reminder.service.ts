@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 import { PaymentRepository } from './payment.repository';
 import { PaymentService } from './payment.service';
 
-const REMINDER_CRON = CronExpression.EVERY_10_SECONDS;
+const REMINDER_CRON = CronExpression.EVERY_DAY_AT_6AM;
 
 @Injectable()
 export class PaymentReminderService {
