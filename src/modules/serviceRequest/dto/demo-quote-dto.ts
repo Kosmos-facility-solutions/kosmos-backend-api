@@ -9,7 +9,7 @@ import { CreateServiceRequestDto } from './create-service-request.dto';
 
 export class CreateDemoQuoteServiceRequestDto extends OmitType(
   CreateServiceRequestDto,
-  ['propertyId'] as const,
+  ['propertyId', 'estimatedPrice'] as const,
 ) {}
 
 export class CreateServiceRequestDemoQuoteDto {

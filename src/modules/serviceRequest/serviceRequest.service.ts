@@ -8,10 +8,14 @@ import {
   ContractStatus,
   PaymentFrequency,
 } from '@modules/contract/entities/contract.entity';
+import { Product } from '@modules/product/entities/product.entity';
+import { ProductRepository } from '@modules/product/product.repository';
 import { PropertyRepository } from '@modules/property/property.repository';
 import { PropertyService } from '@modules/property/property.service';
 import { Role } from '@modules/role/entities/role.entity';
 import { ROLES } from '@modules/role/enums/roles.enum';
+import { Service } from '@modules/service/entities/service.entity';
+import { ServiceRepository } from '@modules/service/service.repository';
 import { User } from '@modules/user/entities/user.entity';
 import { UserRepository } from '@modules/user/user.repository';
 import { UserService } from '@modules/user/user.service';
@@ -21,7 +25,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { IncludeOptions, OrderItem, Transaction } from 'sequelize';
+import { IncludeOptions, Op, OrderItem, Transaction } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import { MailingService } from '../email/email.service';
 import { ApproveServiceRequestDto } from './dto/approved-service-request.dto';
@@ -34,7 +38,13 @@ import {
   ServiceRequest,
   ServiceRequestStatus,
 } from './entities/serviceRequest.entity';
+import { ServiceRequestProduct } from './entities/serviceRequestProduct.entity';
 import { ServiceRequestRepository } from './serviceRequest.repository';
+
+type ServiceRequestProductSelection = {
+  productId: number;
+  quantity: number;
+};
 
 @Injectable()
 export class ServiceRequestService {
@@ -46,35 +56,72 @@ export class ServiceRequestService {
     private userService: UserService,
     private propertyService: PropertyService,
     private propertyRepository: PropertyRepository,
+    private serviceRepository: ServiceRepository,
+    private productRepository: ProductRepository,
     private sequelize: Sequelize, // For transactions,
     private contractService: ContractService,
   ) {}
 
   async create(createServiceRequestDto: CreateServiceRequestDto) {
-    const data = {
-      ...createServiceRequestDto,
-      scheduledDate: new Date(createServiceRequestDto.scheduledDate),
-      walkthroughDate: new Date(createServiceRequestDto.walkthroughDate),
-      recurrenceEndDate: createServiceRequestDto.recurrenceEndDate
-        ? new Date(createServiceRequestDto.recurrenceEndDate)
-        : null,
-    };
+    let transaction: Transaction;
+    const { products, ...serviceRequestPayload } = createServiceRequestDto;
 
-    const serviceRequest = await this.serviceRequestRepository.create(data);
-    const fullServiceRequest = await this.serviceRequestRepository.findOneById(
-      serviceRequest.id,
-      [
-        { association: 'user' },
-        { association: 'service' },
-        { association: 'property' },
-      ],
-    );
+    try {
+      transaction = await this.sequelize.transaction();
 
-    await this.mailingService.sendServiceRequestAdminEmail(fullServiceRequest);
-    await this.mailingService.sendServiceRequestCustomerEmail(
-      fullServiceRequest,
-    );
-    return serviceRequest;
+      const normalizedProducts = this.normalizeProductSelections(products);
+      const estimatedPrice = await this.calculatePriceFromSelections(
+        serviceRequestPayload.serviceId,
+        serviceRequestPayload.estimatedDurationMinutes,
+        normalizedProducts,
+      );
+
+      const data = {
+        ...serviceRequestPayload,
+        scheduledDate: new Date(serviceRequestPayload.scheduledDate),
+        walkthroughDate: new Date(serviceRequestPayload.walkthroughDate),
+        recurrenceEndDate: serviceRequestPayload.recurrenceEndDate
+          ? new Date(serviceRequestPayload.recurrenceEndDate)
+          : null,
+        estimatedPrice,
+      };
+
+      const serviceRequest = await this.serviceRequestRepository.create(
+        data,
+        transaction,
+      );
+
+      await this.replaceServiceRequestProducts(
+        serviceRequest.id,
+        normalizedProducts,
+        transaction,
+      );
+
+      await transaction.commit();
+      transaction = null;
+
+      const fullServiceRequest =
+        await this.serviceRequestRepository.findOneById(serviceRequest.id, [
+          { association: 'user' },
+          { association: 'service' },
+          { association: 'property' },
+          { association: 'serviceRequestProducts' },
+          { association: 'products' },
+        ]);
+
+      await this.mailingService.sendServiceRequestAdminEmail(
+        fullServiceRequest,
+      );
+      await this.mailingService.sendServiceRequestCustomerEmail(
+        fullServiceRequest,
+      );
+      return serviceRequest;
+    } catch (error) {
+      if (transaction) {
+        await transaction.rollback();
+      }
+      throw error;
+    }
   }
 
   /**
@@ -125,37 +172,45 @@ export class ServiceRequestService {
 
       this.logger.log(`Property created: ${property.name}`);
 
+      const { products, ...serviceRequestInput } =
+        createServiceRequestDto.serviceRequest;
+
+      const normalizedProducts = this.normalizeProductSelections(products);
+      const computedEstimatedPrice = await this.calculatePriceFromSelections(
+        serviceRequestInput.serviceId,
+        serviceRequestInput.estimatedDurationMinutes,
+        normalizedProducts,
+      );
+
       const serviceRequestData: any = {
         userId: user.id,
         propertyId: property.id,
-        serviceId: createServiceRequestDto.serviceRequest.serviceId,
-        scheduledDate: new Date(
-          createServiceRequestDto.serviceRequest.scheduledDate,
-        ),
-        scheduledTime: createServiceRequestDto.serviceRequest.scheduledTime,
-        estimatedPrice: createServiceRequestDto.serviceRequest.estimatedPrice,
+        serviceId: serviceRequestInput.serviceId,
+        scheduledDate: new Date(serviceRequestInput.scheduledDate),
+        scheduledTime: serviceRequestInput.scheduledTime,
+        estimatedPrice: computedEstimatedPrice,
         status: ServiceRequestStatus.Pending, // Always start as pending for quotes
-        priority: createServiceRequestDto.serviceRequest.priority,
-        notes: createServiceRequestDto.serviceRequest.notes,
-        specialInstructions:
-          createServiceRequestDto.serviceRequest.specialInstructions,
-        isRecurring:
-          createServiceRequestDto.serviceRequest.isRecurring || false,
-        recurrenceFrequency:
-          createServiceRequestDto.serviceRequest.recurrenceFrequency,
-        recurrenceEndDate: createServiceRequestDto.serviceRequest
-          .recurrenceEndDate
-          ? new Date(createServiceRequestDto.serviceRequest.recurrenceEndDate)
+        priority: serviceRequestInput.priority,
+        notes: serviceRequestInput.notes,
+        specialInstructions: serviceRequestInput.specialInstructions,
+        isRecurring: serviceRequestInput.isRecurring || false,
+        recurrenceFrequency: serviceRequestInput.recurrenceFrequency,
+        recurrenceEndDate: serviceRequestInput.recurrenceEndDate
+          ? new Date(serviceRequestInput.recurrenceEndDate)
           : null,
-        estimatedDurationMinutes:
-          createServiceRequestDto.serviceRequest.estimatedDurationMinutes,
-        additionalServices:
-          createServiceRequestDto.serviceRequest.additionalServices,
+        estimatedDurationMinutes: serviceRequestInput.estimatedDurationMinutes,
+        additionalServices: serviceRequestInput.additionalServices,
       };
 
       // 4. Create service request
       const serviceRequest = await this.serviceRequestRepository.create(
         serviceRequestData,
+        transaction,
+      );
+
+      await this.replaceServiceRequestProducts(
+        serviceRequest.id,
+        normalizedProducts,
         transaction,
       );
 
@@ -174,6 +229,8 @@ export class ServiceRequestService {
           { association: 'user' },
           { association: 'service' },
           { association: 'property' },
+          { association: 'serviceRequestProducts' },
+          { association: 'products' },
         ]);
       try {
         await this.mailingService.sendServiceRequestAdminEmail(
@@ -217,10 +274,78 @@ export class ServiceRequestService {
   }
 
   async update(id: number, updateServiceRequestDto: UpdateServiceRequestDto) {
-    return await this.serviceRequestRepository.update(
-      id,
-      updateServiceRequestDto,
-    );
+    let transaction: Transaction;
+    const {
+      products,
+      estimatedPrice: _ignoredEstimatedPrice,
+      ...payload
+    } = updateServiceRequestDto;
+    void _ignoredEstimatedPrice;
+
+    try {
+      transaction = await this.sequelize.transaction();
+
+      const serviceRequest = await this.serviceRequestRepository.findOneById(
+        id,
+        [{ association: 'serviceRequestProducts' }],
+      );
+
+      const shouldRecalculate =
+        payload.serviceId !== undefined ||
+        payload.estimatedDurationMinutes !== undefined ||
+        products !== undefined;
+
+      let normalizedProducts: ServiceRequestProductSelection[] | undefined =
+        undefined;
+
+      if (products !== undefined) {
+        normalizedProducts = this.normalizeProductSelections(products);
+      } else if (shouldRecalculate) {
+        normalizedProducts =
+          serviceRequest.serviceRequestProducts?.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+          })) ?? [];
+      }
+
+      const updatePayload: Partial<ServiceRequest> = { ...payload };
+
+      if (shouldRecalculate) {
+        const serviceId = updatePayload.serviceId ?? serviceRequest.serviceId;
+        const estimatedDurationMinutes =
+          updatePayload.estimatedDurationMinutes ??
+          serviceRequest.estimatedDurationMinutes;
+
+        const newEstimatedPrice = await this.calculatePriceFromSelections(
+          serviceId,
+          estimatedDurationMinutes,
+          normalizedProducts ?? [],
+        );
+        updatePayload.estimatedPrice = newEstimatedPrice;
+      }
+
+      const updatedServiceRequest = await this.serviceRequestRepository.update(
+        id,
+        updatePayload,
+        transaction,
+      );
+
+      if (products !== undefined) {
+        await this.replaceServiceRequestProducts(
+          id,
+          normalizedProducts ?? [],
+          transaction,
+        );
+      }
+
+      await transaction.commit();
+      return updatedServiceRequest;
+    } catch (error) {
+      if (transaction) {
+        await transaction.rollback();
+      }
+      throw error;
+    }
   }
 
   async remove(id: number) {
@@ -321,6 +446,11 @@ export class ServiceRequestService {
         { association: 'user' },
         { association: 'service' },
         { association: 'property' },
+        {
+          association: 'serviceRequestProducts',
+          include: [{ association: 'product' }],
+        },
+        { association: 'products' },
       ],
     );
 
@@ -360,7 +490,7 @@ export class ServiceRequestService {
       throw error;
     }
 
-    const contract = await this.createContractFromServiceRequest(
+    await this.createContractFromServiceRequest(
       fullServiceRequest,
       approveDto,
       id,
@@ -423,7 +553,7 @@ export class ServiceRequestService {
         propertyId: fullServiceRequest.propertyId,
         startDate: startDate.toISOString().split('T')[0],
         endDate: endDate ? endDate.toISOString().split('T')[0] : null,
-        paymentAmount: Number(fullServiceRequest.estimatedPrice),
+        paymentAmount: this.resolvePaymentAmount(fullServiceRequest),
         paymentFrequency,
         nextPaymentDue: nextPaymentDue.toISOString().split('T')[0],
         serviceFrequency: fullServiceRequest.recurrenceFrequency,
@@ -462,6 +592,147 @@ export class ServiceRequestService {
     }
   }
 
+  private resolvePaymentAmount(serviceRequest: ServiceRequest): number {
+    const recalculatedPrice = serviceRequest.service
+      ? this.calculateEstimatedPriceValue(
+          serviceRequest.service,
+          serviceRequest.estimatedDurationMinutes,
+          serviceRequest.serviceRequestProducts?.map((item) => ({
+            product: item.product,
+            quantity: item.quantity,
+          })) ?? [],
+        )
+      : null;
+
+    const priceSource =
+      serviceRequest.actualPrice ??
+      recalculatedPrice ??
+      serviceRequest.estimatedPrice ??
+      0;
+
+    return Number(priceSource);
+  }
+
+  private normalizeProductSelections(
+    products?: Array<{ productId: number; quantity?: number }>,
+  ): ServiceRequestProductSelection[] {
+    if (!products?.length) {
+      return [];
+    }
+
+    const normalized = new Map<number, number>();
+
+    for (const product of products) {
+      if (!product || typeof product.productId !== 'number') {
+        continue;
+      }
+
+      const quantityInput =
+        typeof product.quantity === 'number' &&
+        Number.isFinite(product.quantity)
+          ? product.quantity
+          : 1;
+      const cleanedQuantity = Math.max(1, Math.floor(quantityInput));
+      const current = normalized.get(product.productId) ?? 0;
+      normalized.set(product.productId, current + cleanedQuantity);
+    }
+
+    return Array.from(normalized.entries()).map(
+      ([productId, quantity]): ServiceRequestProductSelection => ({
+        productId,
+        quantity,
+      }),
+    );
+  }
+
+  private async calculatePriceFromSelections(
+    serviceId: number,
+    estimatedDurationMinutes?: number,
+    products: ServiceRequestProductSelection[] = [],
+  ): Promise<number> {
+    const service = await this.serviceRepository.findOneById(serviceId);
+
+    let productEntities: Product[] = [];
+    const productIds = Array.from(
+      new Set(products.map((product) => product.productId)),
+    );
+
+    if (productIds.length) {
+      productEntities = await this.productRepository.findAll({
+        where: {
+          id: {
+            [Op.in]: productIds,
+          },
+        },
+      });
+
+      const foundIds = new Set(productEntities.map((product) => product.id));
+      const missing = productIds.filter((id) => !foundIds.has(id));
+
+      if (missing.length) {
+        throw new NotFoundException(
+          `Products not found: ${missing.join(', ')}`,
+        );
+      }
+    }
+
+    const productsMap = new Map(productEntities.map((p) => [p.id, p]));
+
+    return this.calculateEstimatedPriceValue(
+      service,
+      estimatedDurationMinutes,
+      products.map((selection) => ({
+        product: productsMap.get(selection.productId),
+        quantity: selection.quantity,
+      })),
+    );
+  }
+
+  private calculateEstimatedPriceValue(
+    service: Service,
+    estimatedDurationMinutes?: number,
+    products: Array<{ product?: Product; quantity: number }> = [],
+  ): number {
+    const durationMinutes =
+      estimatedDurationMinutes ?? service.estimatedDurationMinutes ?? 0;
+    const durationHours = durationMinutes / 60;
+    const serviceRate = Number(service.basePrice || 0);
+    const serviceTotal = durationHours > 0 ? serviceRate * durationHours : 0;
+
+    const productsTotal = products.reduce((sum, item) => {
+      if (!item.product) {
+        return sum;
+      }
+      return sum + Number(item.product.price || 0) * item.quantity;
+    }, 0);
+
+    return Number((serviceTotal + productsTotal).toFixed(2));
+  }
+
+  private async replaceServiceRequestProducts(
+    serviceRequestId: number,
+    products: ServiceRequestProductSelection[],
+    transaction?: Transaction,
+  ) {
+    await ServiceRequestProduct.destroy({
+      where: { serviceRequestId },
+      transaction,
+    });
+
+    if (!products.length) {
+      return;
+    }
+
+    await ServiceRequestProduct.bulkCreate(
+      products.map((product) => ({
+        serviceRequestId,
+        productId: product.productId,
+        quantity: product.quantity,
+      })),
+      { transaction },
+    );
+  }
+
   private normalizeTime(time?: string, hoursToAdd = 0): string {
     if (!time) {
       return null;
@@ -469,7 +740,7 @@ export class ServiceRequestService {
     try {
       const [hoursPart = '0', minutesPart = '0'] = time.split(':');
       let hours = parseInt(hoursPart, 10);
-      let minutes = parseInt(minutesPart, 10);
+      const minutes = parseInt(minutesPart, 10);
       if (Number.isNaN(hours) || Number.isNaN(minutes)) {
         return null;
       }

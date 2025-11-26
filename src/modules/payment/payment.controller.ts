@@ -1,8 +1,8 @@
 import { User as UserDecorator } from '@decorators/user.decorator';
 import { ArrayWhereOptions } from '@libraries/baseModel.entity';
 import { IJwtPayload } from '@modules/auth/auth.service';
-import { ValidateJWT } from '@modules/auth/decorators/validateJWT.decorator';
 import { IsRole } from '@modules/auth/decorators/isRole.decorator';
+import { ValidateJWT } from '@modules/auth/decorators/validateJWT.decorator';
 import { ROLES } from '@modules/role/enums/roles.enum';
 import {
   BadRequestException,
@@ -15,8 +15,8 @@ import {
   ParseIntPipe,
   Post,
   Query,
-  Req,
   RawBodyRequest,
+  Req,
 } from '@nestjs/common';
 import { ApiExtraModels, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ParseAttributesPipe } from '@pipes/parseAttributes.pipe';
@@ -33,8 +33,8 @@ import { ApiQueryInclude } from '@swagger/parameters/include.decorator';
 import { ApiQueryWhere } from '@swagger/parameters/where.decorator';
 import { ApiCommonResponses } from '@swagger/utils/commonResponses.decorator';
 import { ApiQueryPagination } from '@swagger/utils/pagination.decorator';
-import { IncludeOptions, OrderItem } from 'sequelize';
 import { Request } from 'express';
+import { IncludeOptions, OrderItem } from 'sequelize';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { PaymentResponseDto } from './dto/payment-response.dto';
 import { Payment } from './entities/payment.entity';
@@ -65,8 +65,8 @@ export class PaymentController {
   @ApiQueryPagination()
   @ApiQueryAttributes()
   @ApiQueryInclude()
-  @ValidateJWT()
   @IsRole(ROLES.ADMIN)
+  @ValidateJWT()
   @Get()
   async findAll(
     @Query('where', ParseWherePipe) where?: ArrayWhereOptions<Payment>,

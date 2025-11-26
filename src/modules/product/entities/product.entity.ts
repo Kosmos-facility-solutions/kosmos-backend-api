@@ -1,5 +1,8 @@
 import { BaseModel } from '@libraries/baseModel.entity';
-import { Column, DataType, Table } from 'sequelize-typescript';
+import { ServiceRequest } from '@modules/serviceRequest/entities/serviceRequest.entity';
+import { ServiceRequestProduct } from '@modules/serviceRequest/entities/serviceRequestProduct.entity';
+import { ApiHideProperty } from '@nestjs/swagger';
+import { BelongsToMany, Column, DataType, Table } from 'sequelize-typescript';
 
 @Table({
   tableName: 'product',
@@ -22,4 +25,15 @@ export class Product extends BaseModel<Product> {
     allowNull: true,
   })
   description?: string;
+
+  @ApiHideProperty()
+  @BelongsToMany(() => ServiceRequest, {
+    through: {
+      model: () => ServiceRequestProduct,
+      unique: false,
+    },
+    foreignKey: 'productId',
+    otherKey: 'serviceRequestId',
+  })
+  serviceRequests: ServiceRequest[];
 }

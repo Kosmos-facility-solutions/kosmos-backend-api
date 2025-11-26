@@ -1,4 +1,5 @@
 import { ApiHideProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -8,12 +9,14 @@ import {
   IsOptional,
   IsString,
   Min,
+  ValidateNested,
 } from 'class-validator';
 import {
   RecurrenceFrequency,
   ServiceRequestPriority,
   ServiceRequestStatus,
 } from '../entities/serviceRequest.entity';
+import { ServiceRequestProductDto } from './service-request-product.dto';
 
 export class CreateServiceRequestDto {
   @ApiHideProperty()
@@ -53,10 +56,10 @@ export class CreateServiceRequestDto {
   @IsString()
   scheduledTime: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  estimatedPrice: number;
+  estimatedPrice?: number;
 
   @IsOptional()
   @IsString()
@@ -86,4 +89,10 @@ export class CreateServiceRequestDto {
   @IsArray()
   @IsString({ each: true })
   additionalServices?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ServiceRequestProductDto)
+  products?: ServiceRequestProductDto[];
 }

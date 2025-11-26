@@ -1,4 +1,4 @@
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -8,12 +8,14 @@ import {
   IsOptional,
   IsString,
   Min,
+  ValidateNested,
 } from 'class-validator';
 import {
   RecurrenceFrequency,
   ServiceRequestPriority,
   ServiceRequestStatus,
 } from '../entities/serviceRequest.entity';
+import { ServiceRequestProductDto } from './service-request-product.dto';
 
 export class UpdateServiceRequestDto {
   @IsOptional()
@@ -110,4 +112,10 @@ export class UpdateServiceRequestDto {
   @IsArray()
   @IsString({ each: true })
   additionalServices?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ServiceRequestProductDto)
+  products?: ServiceRequestProductDto[];
 }

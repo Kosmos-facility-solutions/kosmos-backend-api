@@ -1,15 +1,19 @@
 import { BaseModel } from '@libraries/baseModel.entity';
 import { Property } from '@modules/property/entities/property.entity';
+import { Product } from '@modules/product/entities/product.entity';
 import { Service } from '@modules/service/entities/service.entity';
 import { User } from '@modules/user/entities/user.entity';
 import { ApiHideProperty } from '@nestjs/swagger';
 import {
   BelongsTo,
+  BelongsToMany,
   Column,
   DataType,
   ForeignKey,
+  HasMany,
   Table,
 } from 'sequelize-typescript';
+import { ServiceRequestProduct } from './serviceRequestProduct.entity';
 
 export enum ServiceRequestStatus {
   Pending = 'pending',
@@ -183,4 +187,22 @@ export class ServiceRequest extends BaseModel<ServiceRequest> {
   @ApiHideProperty()
   @BelongsTo(() => Service)
   service: Service;
+
+  @ApiHideProperty()
+  @HasMany(() => ServiceRequestProduct, {
+    hooks: true,
+    onDelete: 'CASCADE',
+  })
+  serviceRequestProducts: ServiceRequestProduct[];
+
+  @ApiHideProperty()
+  @BelongsToMany(() => Product, {
+    through: {
+      model: () => ServiceRequestProduct,
+      unique: false,
+    },
+    foreignKey: 'serviceRequestId',
+    otherKey: 'productId',
+  })
+  products: Product[];
 }

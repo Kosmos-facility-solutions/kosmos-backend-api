@@ -187,7 +187,7 @@ export class ServiceRequestController {
   @ApiOperation({ summary: 'Update Service Request entry by id' })
   @ApiCommonResponses()
   @ApiOkResponseData(ServiceRequest)
-  @IsOwner(ServiceRequestService)
+  @IsOwnerOrIsRole(ServiceRequestService, [ROLES.ADMIN])
   @ValidateJWT()
   @Patch(':id')
   async update(
