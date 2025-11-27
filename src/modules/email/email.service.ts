@@ -294,6 +294,32 @@ export class MailingService {
     );
   }
 
+  async sendContactFormMessage(contactMessage: {
+    name: string;
+    email: string;
+    phone?: string;
+    subject?: string;
+    message: string;
+  }) {
+    const adminEmails = await this.getAdminEmails();
+    const context = {
+      name: contactMessage.name,
+      email: contactMessage.email,
+      phone: contactMessage.phone,
+      subject: contactMessage.subject,
+      message: contactMessage.message,
+    };
+
+    for (const email of adminEmails) {
+      await this.sendEmail(
+        email,
+        `New inquiry from ${contactMessage.name}`,
+        'contact_form_message',
+        context,
+      );
+    }
+  }
+
   /**
    * Envía email de contrato aprobado con PDF adjunto
    */

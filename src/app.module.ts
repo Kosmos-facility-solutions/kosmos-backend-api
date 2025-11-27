@@ -1,4 +1,5 @@
 import { ContractModule } from '@modules/contract/contract.module';
+import { ContactModule } from '@modules/contact/contact.module';
 import { EmailModule } from '@modules/email/email.module';
 import { PropertyModule } from '@modules/property/property.module';
 import { ServiceModule } from '@modules/service/service.module';
@@ -30,6 +31,7 @@ import { UserModule } from './modules/user/user.module';
     PaymentModule,
     ServiceVisitModule,
     ProductModule,
+    ContactModule,
   ],
   controllers: [AppController],
   providers: [AppService],
