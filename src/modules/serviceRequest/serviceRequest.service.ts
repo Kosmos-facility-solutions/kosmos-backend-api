@@ -39,6 +39,7 @@ import {
   ServiceRequestStatus,
 } from './entities/serviceRequest.entity';
 import { ServiceRequestProduct } from './entities/serviceRequestProduct.entity';
+import { ServiceRequestStaff } from './entities/serviceRequestStaff.entity';
 import { ServiceRequestRepository } from './serviceRequest.repository';
 
 type ServiceRequestProductSelection = {
@@ -394,6 +395,69 @@ export class ServiceRequestService {
     });
   }
 
+  async assignStaff(serviceRequestId: number, staffIds: number[]) {
+    await this.serviceRequestRepository.findOneById(serviceRequestId);
+
+    const uniqueStaffIds = Array.from(new Set(staffIds));
+
+    if (!uniqueStaffIds.length) {
+      throw new BadRequestException(
+        'At least one staff member must be provided',
+      );
+    }
+
+    const employees = await this.userRepository.findAll({
+      where: {
+        id: {
+          [Op.in]: uniqueStaffIds,
+        },
+      },
+      include: [
+        {
+          association: 'roles',
+          where: {
+            name: ROLES.EMPLOYEE,
+          },
+          required: true,
+        },
+      ],
+    });
+
+    const validStaffIds = new Set(employees.map((employee) => employee.id));
+    const invalidStaffIds = uniqueStaffIds.filter(
+      (staffId) => !validStaffIds.has(staffId),
+    );
+
+    if (invalidStaffIds.length) {
+      throw new BadRequestException(
+        `Users must exist and have employee role: ${invalidStaffIds.join(', ')}`,
+      );
+    }
+
+    await this.replaceServiceRequestStaff(serviceRequestId, uniqueStaffIds);
+
+    const fullServiceRequest = await this.serviceRequestRepository.findOneById(
+      serviceRequestId,
+      [
+        { association: 'user' },
+        { association: 'service' },
+        { association: 'property' },
+        { association: 'assignedStaff' },
+      ],
+    );
+
+    await Promise.all(
+      employees.map((employee) =>
+        this.mailingService.sendServiceRequestStaffAssignmentEmail(
+          employee,
+          fullServiceRequest,
+        ),
+      ),
+    );
+
+    return fullServiceRequest;
+  }
+
   async countByStatus(status: ServiceRequestStatus) {
     return await this.serviceRequestRepository.countByStatus(status);
   }
@@ -728,6 +792,29 @@ export class ServiceRequestService {
         serviceRequestId,
         productId: product.productId,
         quantity: product.quantity,
+      })),
+      { transaction },
+    );
+  }
+
+  private async replaceServiceRequestStaff(
+    serviceRequestId: number,
+    staffIds: number[],
+    transaction?: Transaction,
+  ) {
+    await ServiceRequestStaff.destroy({
+      where: { serviceRequestId },
+      transaction,
+    });
+
+    if (!staffIds.length) {
+      return;
+    }
+
+    await ServiceRequestStaff.bulkCreate(
+      staffIds.map((staffId) => ({
+        serviceRequestId,
+        staffId,
       })),
       { transaction },
     );

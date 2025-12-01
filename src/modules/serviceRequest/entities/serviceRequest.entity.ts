@@ -14,6 +14,7 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { ServiceRequestProduct } from './serviceRequestProduct.entity';
+import { ServiceRequestStaff } from './serviceRequestStaff.entity';
 
 export enum ServiceRequestStatus {
   Pending = 'pending',
@@ -205,4 +206,22 @@ export class ServiceRequest extends BaseModel<ServiceRequest> {
     otherKey: 'productId',
   })
   products: Product[];
+
+  @ApiHideProperty()
+  @BelongsToMany(() => User, {
+    through: {
+      model: () => ServiceRequestStaff,
+      unique: false,
+    },
+    foreignKey: 'serviceRequestId',
+    otherKey: 'staffId',
+  })
+  assignedStaff: User[];
+
+  @ApiHideProperty()
+  @HasMany(() => ServiceRequestStaff, {
+    hooks: true,
+    onDelete: 'CASCADE',
+  })
+  staffAssignments: ServiceRequestStaff[];
 }

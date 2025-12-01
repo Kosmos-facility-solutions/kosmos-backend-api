@@ -44,6 +44,9 @@ export class UserResponseDto implements Plain<User> {
   @ApiHideProperty()
   quotes: ServiceRequest[] = undefined;
   @Expose()
+  @ApiHideProperty()
+  assignedServiceRequests: ServiceRequest[] = undefined;
+  @Expose()
   createdAt: Date;
   @Expose()
   updatedAt: Date;

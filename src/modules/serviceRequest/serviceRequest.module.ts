@@ -10,13 +10,18 @@ import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ServiceRequest } from './entities/serviceRequest.entity';
 import { ServiceRequestProduct } from './entities/serviceRequestProduct.entity';
+import { ServiceRequestStaff } from './entities/serviceRequestStaff.entity';
 import { ServiceRequestController } from './serviceRequest.controller';
 import { ServiceRequestRepository } from './serviceRequest.repository';
 import { ServiceRequestService } from './serviceRequest.service';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([ServiceRequest, ServiceRequestProduct]),
+    SequelizeModule.forFeature([
+      ServiceRequest,
+      ServiceRequestProduct,
+      ServiceRequestStaff,
+    ]),
     UserModule,
     PropertyModule,
     ContractModule,

@@ -201,6 +201,84 @@ export class MailingService {
     }
   }
 
+  async sendServiceRequestStaffAssignmentEmail(
+    staff: User,
+    serviceRequest: ServiceRequest & {
+      user?: User;
+      service?: any;
+      property?: any;
+    },
+  ) {
+    if (!staff?.email) {
+      this.logger.warn(
+        `Skipping staff assignment email because staff ${staff?.id} has no email`,
+      );
+      return;
+    }
+
+    const formatDate = (dateValue?: Date | string) => {
+      if (!dateValue) {
+        return null;
+      }
+      try {
+        return format(new Date(dateValue), 'MMMM dd, yyyy');
+      } catch (error) {
+        this.logger.warn(
+          `Unable to format date "${dateValue}" for staff assignment email`,
+        );
+        return null;
+      }
+    };
+
+    const scheduledFormattedDate = formatDate(serviceRequest.scheduledDate);
+    const walkthroughFormattedDate = formatDate(serviceRequest.walkthroughDate);
+    const propertyAddressParts = [
+      serviceRequest.property?.address,
+      serviceRequest.property?.city,
+      serviceRequest.property?.state,
+      serviceRequest.property?.zipCode,
+      serviceRequest.property?.country,
+    ].filter(Boolean);
+
+    const staffName =
+      `${staff.firstName || ''} ${staff.lastName || ''}`.trim() || 'Team Member';
+
+    const context = {
+      staffName,
+      requestId: serviceRequest.id,
+      serviceName: serviceRequest.service?.name || 'Service',
+      priority: serviceRequest.priority || 'normal',
+      scheduledDate: scheduledFormattedDate || 'To be determined',
+      scheduledTime: serviceRequest.scheduledTime || 'N/A',
+      walkthroughDate: walkthroughFormattedDate,
+      walkthroughTime: serviceRequest.walkthroughTime || null,
+      estimatedDuration: serviceRequest.estimatedDurationMinutes || null,
+      isRecurring: serviceRequest.isRecurring,
+      recurrenceFrequency: serviceRequest.recurrenceFrequency,
+      propertyName: serviceRequest.property?.name || 'Property',
+      propertyAddress: propertyAddressParts.join(', ') || 'N/A',
+      propertyContactName: serviceRequest.property?.contactName || null,
+      propertyContactPhone: serviceRequest.property?.contactPhone || null,
+      propertyAccessInstructions:
+        serviceRequest.property?.accessInstructions || null,
+      specialInstructions: serviceRequest.specialInstructions || null,
+      notes: serviceRequest.notes || null,
+      customerName:
+        `${serviceRequest.user?.firstName || ''} ${serviceRequest.user?.lastName || ''}`.trim() ||
+        'Customer',
+      customerEmail: serviceRequest.user?.email || 'N/A',
+      customerPhone: serviceRequest.user?.phone || null,
+      dashboardUrl: `${config.urls.baseFrontEndURL}/dashboard`,
+    };
+
+    await this.sendEmail(
+      staff.email,
+      `New Service Assignment #${serviceRequest.id}`,
+      'service_request_staff_assignment',
+      context,
+    );
+  }
+
   /**
    * Send service approved email to NEW customer (with account creation)
    */

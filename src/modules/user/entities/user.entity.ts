@@ -3,6 +3,7 @@ import { FederatedCredential } from '@modules/auth/entities/federatedCredential.
 import { Property } from '@modules/property/entities/property.entity';
 import { Role } from '@modules/role/entities/role.entity';
 import { ServiceRequest } from '@modules/serviceRequest/entities/serviceRequest.entity';
+import { ServiceRequestStaff } from '@modules/serviceRequest/entities/serviceRequestStaff.entity';
 import { UserRole } from '@modules/userrole/entities/userrole.entity';
 import { ApiHideProperty } from '@nestjs/swagger';
 import bcrypt from 'bcrypt';
@@ -135,6 +136,17 @@ export class User extends BaseModel<User> {
     onDelete: 'CASCADE',
   })
   quotes: ServiceRequest[];
+
+  @ApiHideProperty()
+  @BelongsToMany(() => ServiceRequest, {
+    through: {
+      model: () => ServiceRequestStaff,
+      unique: false,
+    },
+    foreignKey: 'staffId',
+    otherKey: 'serviceRequestId',
+  })
+  assignedServiceRequests: ServiceRequest[];
 
   @BeforeBulkCreate
   @BeforeBulkUpdate
