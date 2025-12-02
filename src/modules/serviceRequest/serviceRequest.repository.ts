@@ -1,7 +1,6 @@
 import { SequelizeCrudRepository } from '@libraries/SequelizeCrudRepository';
 import { Property } from '@modules/property/entities/property.entity';
 import { Service } from '@modules/service/entities/service.entity';
-import { User } from '@modules/user/entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Transaction } from 'sequelize';
@@ -42,7 +41,7 @@ export class ServiceRequestRepository extends SequelizeCrudRepository<ServiceReq
     return await this.findAll(
       {
         where: { propertyId },
-        include: [Service, User],
+        include: [Service, { association: 'user' }],
         order: [['scheduledDate', 'DESC']],
       },
       transaction,
@@ -56,7 +55,7 @@ export class ServiceRequestRepository extends SequelizeCrudRepository<ServiceReq
     return await this.findAll(
       {
         where: { status },
-        include: [Property, Service, User],
+        include: [Property, Service, { association: 'user' }],
         order: [['scheduledDate', 'ASC']],
       },
       transaction,
@@ -86,7 +85,7 @@ export class ServiceRequestRepository extends SequelizeCrudRepository<ServiceReq
     return await this.findAll(
       {
         where: { status: ServiceRequestStatus.Pending },
-        include: [Property, Service, User],
+        include: [Property, Service, { association: 'user' }],
         order: [['createdAt', 'ASC']],
       },
       transaction,
