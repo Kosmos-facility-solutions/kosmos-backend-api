@@ -28,6 +28,7 @@ import {
 import { IncludeOptions, Op, OrderItem, Transaction } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import { MailingService } from '../email/email.service';
+import { PaymentService } from '../payment/payment.service';
 import { ApproveServiceRequestDto } from './dto/approved-service-request.dto';
 import { CancelServiceRequestDto } from './dto/cancel-service-request.dto';
 import { CreateServiceRequestDto } from './dto/create-service-request.dto';
@@ -61,6 +62,7 @@ export class ServiceRequestService {
     private productRepository: ProductRepository,
     private sequelize: Sequelize, // For transactions,
     private contractService: ContractService,
+    private paymentService: PaymentService,
   ) {}
 
   async create(createServiceRequestDto: CreateServiceRequestDto) {
@@ -608,8 +610,10 @@ export class ServiceRequestService {
         endDate.setFullYear(endDate.getFullYear() + 1);
       }
 
-      const nextPaymentDue = new Date(startDate);
-      nextPaymentDue.setDate(nextPaymentDue.getDate() + 7);
+      const nextPaymentDue = this.calculateInitialNextPaymentDue(
+        startDate,
+        paymentFrequency,
+      );
 
       const contractData = {
         clientId: fullServiceRequest.userId,
@@ -619,7 +623,9 @@ export class ServiceRequestService {
         endDate: endDate ? endDate.toISOString().split('T')[0] : null,
         paymentAmount: this.resolvePaymentAmount(fullServiceRequest),
         paymentFrequency,
-        nextPaymentDue: nextPaymentDue.toISOString().split('T')[0],
+        nextPaymentDue: nextPaymentDue
+          ? nextPaymentDue.toISOString().split('T')[0]
+          : null,
         serviceFrequency: fullServiceRequest.recurrenceFrequency,
         workStartTime: this.normalizeTime(fullServiceRequest.scheduledTime),
         workEndTime: this.normalizeTime(fullServiceRequest.scheduledTime, 8),
@@ -635,6 +641,10 @@ export class ServiceRequestService {
       };
 
       const contract = await this.contractService.create(contractData);
+
+      if (paymentFrequency === PaymentFrequency.OneTime) {
+        await this.createImmediateContractPayment(contract.id);
+      }
 
       this.logger.log(
         `Contract ${contract.contractNumber} created for ServiceRequest #${serviceRequestId}`,
@@ -675,6 +685,49 @@ export class ServiceRequestService {
       0;
 
     return Number(priceSource);
+  }
+
+  private calculateInitialNextPaymentDue(
+    startDate: Date,
+    paymentFrequency: PaymentFrequency,
+  ): Date | null {
+    const nextDate = new Date(startDate);
+
+    switch (paymentFrequency) {
+      case PaymentFrequency.Weekly:
+        nextDate.setDate(nextDate.getDate() + 7);
+        return nextDate;
+      case PaymentFrequency.BiWeekly:
+        nextDate.setDate(nextDate.getDate() + 14);
+        return nextDate;
+      case PaymentFrequency.Monthly:
+        nextDate.setMonth(nextDate.getMonth() + 1);
+        return nextDate;
+      case PaymentFrequency.Quarterly:
+        nextDate.setMonth(nextDate.getMonth() + 3);
+        return nextDate;
+      default:
+        return null;
+    }
+  }
+
+  private async createImmediateContractPayment(contractId: number) {
+    try {
+      await this.paymentService.create(
+        {
+          contractId,
+          sendEmail: true,
+        },
+        null,
+      );
+      this.logger.log(
+        `Immediate payment session created for one-time contract #${contractId}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to create immediate payment for contract #${contractId}: ${error}`,
+      );
+    }
   }
 
   private normalizeProductSelections(

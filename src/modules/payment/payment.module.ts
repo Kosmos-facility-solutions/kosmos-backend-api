@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ContractModule } from '@modules/contract/contract.module';
 import { ServiceRequestModule } from '@modules/serviceRequest/serviceRequest.module';
@@ -13,7 +13,7 @@ import { PaymentService } from './payment.service';
 @Module({
   imports: [
     SequelizeModule.forFeature([Payment]),
-    ServiceRequestModule,
+    forwardRef(() => ServiceRequestModule),
     ContractModule,
     UserModule,
   ],
