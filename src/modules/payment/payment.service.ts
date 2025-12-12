@@ -91,6 +91,19 @@ export class PaymentService {
       createPaymentDto.provider ||
       (this.paymentGatewayService.getDefaultProvider() as PaymentProvider);
 
+    if (contract?.id) {
+      const hasActivePayment =
+        await this.paymentRepository.hasActivePaymentForContract(
+          contract.id,
+        );
+
+      if (hasActivePayment) {
+        throw new BadRequestException(
+          'An active payment already exists for this contract',
+        );
+      }
+    }
+
     const session = await this.paymentGatewayService.createCheckoutSession({
       amount: numericAmount,
       currency,
