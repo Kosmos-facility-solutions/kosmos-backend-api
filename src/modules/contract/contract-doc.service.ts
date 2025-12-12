@@ -10,7 +10,9 @@ import {
   Paragraph,
   Table,
   TableCell,
+  TableLayoutType,
   TableRow,
+  TextDirection,
   TextRun,
   WidthType,
 } from 'docx';
@@ -457,6 +459,8 @@ export class ContractDocService {
   private buildSignatureTable(clientName: string, today: string): Table {
     return new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
+      layout: TableLayoutType.FIXED,
+      columnWidths: [4505, 4505],
       rows: [
         new TableRow({
           children: [
@@ -485,6 +489,9 @@ export class ContractDocService {
 
   private signatureLabelCell(label: string, value: string): TableCell {
     return new TableCell({
+      width: { size: 50, type: WidthType.PERCENTAGE },
+      textDirection: TextDirection.LEFT_TO_RIGHT_TOP_TO_BOTTOM,
+      margins: { top: 120, bottom: 120, left: 120, right: 120 },
       children: [
         new Paragraph({
           children: [
@@ -507,6 +514,9 @@ export class ContractDocService {
 
   private signatureLineCell(): TableCell {
     return new TableCell({
+      width: { size: 50, type: WidthType.PERCENTAGE },
+      textDirection: TextDirection.LEFT_TO_RIGHT_TOP_TO_BOTTOM,
+      margins: { top: 120, bottom: 120, left: 120, right: 120 },
       children: [
         new Paragraph({
           border: {
@@ -525,6 +535,9 @@ export class ContractDocService {
 
   private signatureMetaCell(text: string): TableCell {
     return new TableCell({
+      width: { size: 50, type: WidthType.PERCENTAGE },
+      textDirection: TextDirection.LEFT_TO_RIGHT_TOP_TO_BOTTOM,
+      margins: { top: 80, bottom: 80, left: 120, right: 120 },
       children: [
         new Paragraph({
           children: [

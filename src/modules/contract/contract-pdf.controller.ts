@@ -88,9 +88,6 @@ export class ContractPdfController {
 
       const pdfBuffer =
         await this.contractPdfService.generateContractPdf(contract);
-
-      console.log(pdfBuffer);
-
       res.set({
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="Contract_${contract.contractNumber}.pdf"`,

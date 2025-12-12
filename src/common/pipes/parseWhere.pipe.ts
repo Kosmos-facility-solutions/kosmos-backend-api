@@ -8,8 +8,8 @@ import {
   PipeTransform,
 } from '@nestjs/common';
 import _ from 'lodash';
-import { Op } from 'sequelize';
 import queryString from 'node:querystring';
+import { Op } from 'sequelize';
 
 const OPERATOR_ALIASES = {
   $eq: Op.eq,
@@ -44,7 +44,6 @@ export class ParseWherePipe implements PipeTransform {
     try {
       return ParseWherePipe.parseWhereString(whereValue) as ArrayWhereOptions;
     } catch (e) {
-      console.log(e);
       this.logger.error(e);
       throw new HttpException(
         `Validation failed (Array string is expected) for ${metadata.data}`,
