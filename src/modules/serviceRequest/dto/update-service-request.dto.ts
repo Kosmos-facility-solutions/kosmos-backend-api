@@ -101,6 +101,10 @@ export class UpdateServiceRequestDto {
   recurrenceEndDate?: Date;
 
   @IsOptional()
+  @IsString()
+  preferredWalkthroughContactTime?: string;
+
+  @IsOptional()
   @IsNumber()
   estimatedDurationMinutes?: number;
 

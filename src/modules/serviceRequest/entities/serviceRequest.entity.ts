@@ -104,6 +104,12 @@ export class ServiceRequest extends BaseModel<ServiceRequest> {
   walkthroughTime: string;
 
   @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  preferredWalkthroughContactTime: string;
+
+  @Column({
     type: DataType.DATEONLY,
     allowNull: true,
   })

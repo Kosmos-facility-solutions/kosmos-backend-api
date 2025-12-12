@@ -114,6 +114,8 @@ export class MailingService {
       scheduledTime: serviceRequest.scheduledTime,
       walkthroughTime: serviceRequest.walkthroughTime,
       walkthroughDate: walkthroughFormattedDate,
+      preferredWalkthroughContactTime:
+        serviceRequest.preferredWalkthroughContactTime || null,
       estimatedPrice: Number(serviceRequest.estimatedPrice || 0).toFixed(2),
       isRecurring: serviceRequest.isRecurring,
       recurrenceFrequency: serviceRequest.recurrenceFrequency,
@@ -178,6 +180,8 @@ export class MailingService {
       scheduledTime: serviceRequest.scheduledTime,
       walkthroughDate: walkthroughFormattedDate,
       walkthroughTime: serviceRequest.scheduledTime,
+      preferredWalkthroughContactTime:
+        serviceRequest.preferredWalkthroughContactTime || null,
       estimatedDuration: serviceRequest.estimatedDurationMinutes || 60,
       estimatedPrice: Number(serviceRequest.estimatedPrice || 0).toFixed(2),
       status: serviceRequest.status,

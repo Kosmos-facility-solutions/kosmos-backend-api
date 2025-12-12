@@ -82,6 +82,10 @@ export class CreateServiceRequestDto {
   recurrenceEndDate?: string | null; // ✅ Cambiado a string
 
   @IsOptional()
+  @IsString()
+  preferredWalkthroughContactTime?: string;
+
+  @IsOptional()
   @IsNumber()
   estimatedDurationMinutes?: number;
 

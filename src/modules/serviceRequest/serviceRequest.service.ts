@@ -191,6 +191,8 @@ export class ServiceRequestService {
         serviceId: serviceRequestInput.serviceId,
         scheduledDate: new Date(serviceRequestInput.scheduledDate),
         scheduledTime: serviceRequestInput.scheduledTime,
+        preferredWalkthroughContactTime:
+          serviceRequestInput.preferredWalkthroughContactTime,
         estimatedPrice: computedEstimatedPrice,
         status: ServiceRequestStatus.Pending, // Always start as pending for quotes
         priority: serviceRequestInput.priority,
