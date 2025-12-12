@@ -335,7 +335,7 @@ export class ContractService {
   }
 
   /**
-   * Envía el contrato por correo con el PDF adjunto
+   * Envía el contrato por correo mostrando la ficha técnica (sin adjuntos)
    */
   async sendContractEmailWithPdf(contractId: number): Promise<void> {
     const contract = await this.contractRepository.findOneById(contractId, [
@@ -350,9 +350,6 @@ export class ContractService {
     if (!contract) {
       throw new Error('Contract not found');
     }
-
-    const pdfBuffer =
-      await this.contractPdfService.generateContractPdf(contract);
 
     const emailData = {
       clientName:
@@ -376,11 +373,6 @@ export class ContractService {
     await this.mailingService.sendContractApprovedEmail(
       contract.client?.email || '',
       emailData,
-      {
-        buffer: pdfBuffer,
-        filename: `Contract_${contract.contractNumber}.pdf`,
-        contentType: 'application/pdf',
-      },
     );
   }
 
@@ -398,9 +390,6 @@ export class ContractService {
       throw new Error('Contract not found');
     }
 
-    const docBuffer =
-      await this.contractDocService.generateEditableContract(contract);
-
     const emailData = {
       clientName:
         contract.client?.firstName + ' ' + contract.client.lastName || 'Client',
@@ -423,12 +412,6 @@ export class ContractService {
     await this.mailingService.sendContractApprovedEmail(
       contract.client?.email || '',
       emailData,
-      {
-        buffer: docBuffer,
-        filename: `Contract_${contract.contractNumber}.docx`,
-        contentType:
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      },
     );
   }
 

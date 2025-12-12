@@ -399,7 +399,7 @@ export class MailingService {
   }
 
   /**
-   * Envía email de contrato aprobado con PDF adjunto
+   * Envía email de contrato aprobado con información en cuerpo (sin adjuntos)
    */
   async sendContractApprovedEmail(
     to: string,
@@ -415,12 +415,7 @@ export class MailingService {
       propertyName: string;
       propertyAddress: string;
       dashboardUrl: string;
-    },
-    attachment?: {
-      buffer: Buffer;
-      filename: string;
-      contentType: string;
-    },
+    }
   ): Promise<void> {
     try {
       const templatePath = path.join(
@@ -431,26 +426,11 @@ export class MailingService {
 
       const html = await ejs.renderFile(templatePath, data);
 
-      if (attachment) {
-        await this.emailHttpService.sendWithAttachment(
-          to,
-          `✅ Your Contract is Ready - ${data.contractNumber}`,
-          html,
-          [
-            {
-              filename: attachment.filename,
-              content: attachment.buffer,
-              contentType: attachment.contentType,
-            },
-          ],
-        );
-      } else {
-        await this.emailHttpService.send(
-          to,
-          `✅ Your Contract is Ready - ${data.contractNumber}`,
-          html,
-        );
-      }
+      await this.emailHttpService.send(
+        to,
+        `✅ Your Contract is Ready - ${data.contractNumber}`,
+        html,
+      );
 
       this.logger.info(`Contract email sent successfully to ${to}`);
     } catch (error) {
