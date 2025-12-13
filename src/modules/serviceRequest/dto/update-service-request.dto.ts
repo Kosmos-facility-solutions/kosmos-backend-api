@@ -96,6 +96,10 @@ export class UpdateServiceRequestDto {
   preferredWalkthroughContactTime?: string;
 
   @IsOptional()
+  @IsString()
+  walkthroughNotes?: string;
+
+  @IsOptional()
   @IsNumber()
   estimatedDurationMinutes?: number;
 

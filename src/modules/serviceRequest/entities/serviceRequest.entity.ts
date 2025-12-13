@@ -110,6 +110,12 @@ export class ServiceRequest extends BaseModel<ServiceRequest> {
   preferredWalkthroughContactTime: string;
 
   @Column({
+    type: DataType.TEXT,
+    allowNull: true,
+  })
+  walkthroughNotes: string;
+
+  @Column({
     type: DataType.DATEONLY,
     allowNull: true,
   })

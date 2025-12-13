@@ -86,6 +86,10 @@ export class CreateServiceRequestDto {
   preferredWalkthroughContactTime?: string;
 
   @IsOptional()
+  @IsString()
+  walkthroughNotes?: string;
+
+  @IsOptional()
   @IsNumber()
   estimatedDurationMinutes?: number;
 

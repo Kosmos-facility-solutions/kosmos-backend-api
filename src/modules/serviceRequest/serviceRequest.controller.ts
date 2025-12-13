@@ -42,10 +42,11 @@ import { ApiQueryPagination } from '@swagger/utils/pagination.decorator';
 import { Response } from 'express';
 import { IncludeOptions, OrderItem } from 'sequelize';
 import { ApproveServiceRequestDto } from './dto/approved-service-request.dto';
-import { CancelServiceRequestDto } from './dto/cancel-service-request.dto';
 import { AssignServiceRequestStaffDto } from './dto/assign-service-request-staff.dto';
+import { CancelServiceRequestDto } from './dto/cancel-service-request.dto';
 import { CreateServiceRequestDto } from './dto/create-service-request.dto';
 import { CreateServiceRequestDemoQuoteDto } from './dto/demo-quote-dto';
+import { ScheduleWalkthroughDto } from './dto/schedule-walkthrough.dto';
 import { UpdateServiceRequestDto } from './dto/update-service-request.dto';
 import {
   ServiceRequest,
@@ -204,7 +205,26 @@ export class ServiceRequestController {
   }
 
   @ApiOperation({
-    summary: 'Generate contract preview DOCX for a service request (Admin only)',
+    summary: 'Schedule walkthrough visit for a service request (Admin only)',
+  })
+  @ApiCommonResponses()
+  @ApiOkResponseData(ServiceRequest)
+  @IsRole(ROLES.ADMIN)
+  @ValidateJWT()
+  @Patch(':id/schedule-walkthrough')
+  async scheduleWalkthrough(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() scheduleWalkthroughDto: ScheduleWalkthroughDto,
+  ) {
+    return await this.serviceRequestService.scheduleWalkthrough(
+      +id,
+      scheduleWalkthroughDto,
+    );
+  }
+
+  @ApiOperation({
+    summary:
+      'Generate contract preview DOCX for a service request (Admin only)',
   })
   @ApiCommonResponses()
   @IsRole(ROLES.ADMIN)
@@ -214,8 +234,7 @@ export class ServiceRequestController {
     @Param('id', ParseIntPipe) id: number,
     @Res() res: Response,
   ) {
-    const buffer =
-      await this.serviceRequestService.generateContractPreview(id);
+    const buffer = await this.serviceRequestService.generateContractPreview(id);
 
     res.set({
       'Content-Type':

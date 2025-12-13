@@ -205,6 +205,67 @@ export class MailingService {
     }
   }
 
+  async sendWalkthroughScheduledEmail(
+    serviceRequest: ServiceRequest & {
+      user?: User;
+      service?: any;
+      property?: any;
+    },
+  ) {
+    if (!serviceRequest?.user?.email) {
+      this.logger.warn(
+        `Cannot send walkthrough scheduled email: missing customer email for service request #${serviceRequest?.id}`,
+      );
+      return;
+    }
+
+    const formatDateValue = (value?: Date | string) => {
+      if (!value) {
+        return null;
+      }
+      try {
+        return format(new Date(value), 'MMMM dd, yyyy');
+      } catch (error) {
+        this.logger.warn(
+          `Unable to format walkthrough date "${value}" for service request #${serviceRequest.id}`,
+        );
+        return null;
+      }
+    };
+
+    const walkthroughFormattedDate = formatDateValue(
+      serviceRequest.walkthroughDate,
+    );
+    const propertyAddressParts = [
+      serviceRequest.property?.address,
+      serviceRequest.property?.city,
+      serviceRequest.property?.state,
+      serviceRequest.property?.zipCode,
+      serviceRequest.property?.country,
+    ].filter(Boolean);
+
+    const context = {
+      customerName: serviceRequest.user?.firstName || 'Customer',
+      requestId: serviceRequest.id,
+      serviceName: serviceRequest.service?.name || 'Service',
+      propertyName: serviceRequest.property?.name || 'Property',
+      propertyAddress: propertyAddressParts.join(', ') || 'N/A',
+      walkthroughDate: walkthroughFormattedDate || 'To be determined',
+      walkthroughTime: serviceRequest.walkthroughTime || 'TBD',
+      preferredWalkthroughContactTime:
+        serviceRequest.preferredWalkthroughContactTime || null,
+      walkthroughNotes: serviceRequest.walkthroughNotes || null,
+      dashboardUrl: `${config.urls.baseFrontEndURL}/dashboard`,
+    };
+
+    await this.sendEmail(
+      serviceRequest.user.email,
+      'Walkthrough Visit Confirmed - Kosmos Facility Solutions',
+      'walkthrough_scheduled',
+      context,
+    );
+  }
+
   async sendServiceRequestStaffAssignmentEmail(
     staff: User,
     serviceRequest: ServiceRequest & {

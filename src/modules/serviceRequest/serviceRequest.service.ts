@@ -36,6 +36,7 @@ import { CancelServiceRequestDto } from './dto/cancel-service-request.dto';
 import { CreateServiceRequestDto } from './dto/create-service-request.dto';
 import { CreateServiceRequestDemoQuoteDto } from './dto/demo-quote-dto';
 import { UpdateServiceRequestDto } from './dto/update-service-request.dto';
+import { ScheduleWalkthroughDto } from './dto/schedule-walkthrough.dto';
 import {
   RecurrenceFrequency,
   ServiceRequest,
@@ -90,6 +91,7 @@ export class ServiceRequestService {
           ? new Date(serviceRequestPayload.recurrenceEndDate)
           : null,
         estimatedPrice,
+        walkthroughNotes: serviceRequestPayload.walkthroughNotes,
       };
 
       const serviceRequest = await this.serviceRequestRepository.create(
@@ -196,6 +198,7 @@ export class ServiceRequestService {
         scheduledTime: serviceRequestInput.scheduledTime,
         preferredWalkthroughContactTime:
           serviceRequestInput.preferredWalkthroughContactTime,
+        walkthroughNotes: serviceRequestInput.walkthroughNotes,
         estimatedPrice: computedEstimatedPrice,
         status: ServiceRequestStatus.Pending, // Always start as pending for quotes
         priority: serviceRequestInput.priority,
@@ -380,6 +383,52 @@ export class ServiceRequestService {
 
   async remove(id: number) {
     return await this.serviceRequestRepository.delete(id);
+  }
+
+  async scheduleWalkthrough(
+    id: number,
+    scheduleDto: ScheduleWalkthroughDto,
+  ): Promise<ServiceRequest> {
+    if (!scheduleDto.walkthroughDate || !scheduleDto.walkthroughTime) {
+      throw new BadRequestException(
+        'A walkthrough date and time must be provided',
+      );
+    }
+
+    let parsedDate: Date;
+    try {
+      parsedDate = new Date(scheduleDto.walkthroughDate);
+      if (Number.isNaN(parsedDate.getTime())) {
+        throw new Error('Invalid date');
+      }
+    } catch {
+      throw new BadRequestException('Invalid walkthrough date');
+    }
+
+    const serviceRequest = await this.serviceRequestRepository.findOneById(id);
+
+    if (!serviceRequest) {
+      throw new NotFoundException('Service request not found');
+    }
+
+    await this.serviceRequestRepository.update(id, {
+      walkthroughDate: parsedDate,
+      walkthroughTime: scheduleDto.walkthroughTime,
+      walkthroughNotes: scheduleDto.notes,
+    });
+
+    const updatedServiceRequest =
+      await this.serviceRequestRepository.findOneById(id, [
+        { association: 'user' },
+        { association: 'service' },
+        { association: 'property' },
+      ]);
+
+    await this.mailingService.sendWalkthroughScheduledEmail(
+      updatedServiceRequest,
+    );
+
+    return updatedServiceRequest;
   }
 
   async findByUserId(userId: number) {
