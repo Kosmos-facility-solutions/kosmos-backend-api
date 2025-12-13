@@ -22,6 +22,7 @@ import {
   Post,
   Query,
   Req,
+  Res,
 } from '@nestjs/common';
 import { ApiExtraModels, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ParseAttributesPipe } from '@pipes/parseAttributes.pipe';
@@ -38,6 +39,7 @@ import { ApiQueryInclude } from '@swagger/parameters/include.decorator';
 import { ApiQueryWhere } from '@swagger/parameters/where.decorator';
 import { ApiCommonResponses } from '@swagger/utils/commonResponses.decorator';
 import { ApiQueryPagination } from '@swagger/utils/pagination.decorator';
+import { Response } from 'express';
 import { IncludeOptions, OrderItem } from 'sequelize';
 import { ApproveServiceRequestDto } from './dto/approved-service-request.dto';
 import { CancelServiceRequestDto } from './dto/cancel-service-request.dto';
@@ -199,6 +201,29 @@ export class ServiceRequestController {
       +id,
       updateServiceRequestDto,
     );
+  }
+
+  @ApiOperation({
+    summary: 'Generate contract preview DOCX for a service request (Admin only)',
+  })
+  @ApiCommonResponses()
+  @IsRole(ROLES.ADMIN)
+  @ValidateJWT()
+  @Get(':id/contract-preview')
+  async generateContractPreview(
+    @Param('id', ParseIntPipe) id: number,
+    @Res() res: Response,
+  ) {
+    const buffer =
+      await this.serviceRequestService.generateContractPreview(id);
+
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'Content-Disposition': `attachment; filename=\"contract-preview-${id}.docx\"`,
+    });
+
+    res.send(buffer);
   }
 
   @ApiOperation({ summary: 'Cancel Service Request' })

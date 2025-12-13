@@ -22,6 +22,6 @@ import { Contract } from './entities/contract.entity';
     IsRoleGuard,
     IsSelfUserGuard,
   ],
-  exports: [ContractService, ContractRepository],
+  exports: [ContractService, ContractRepository, ContractDocService],
 })
 export class ContractModule {}

@@ -5,6 +5,7 @@ import { generateTemporaryPassword } from '@libraries/util';
 import { ContractService } from '@modules/contract/contract.service';
 import { ContractResponseDto } from '@modules/contract/dto/contract-response.dto';
 import {
+  Contract,
   ContractStatus,
   PaymentFrequency,
 } from '@modules/contract/entities/contract.entity';
@@ -27,6 +28,7 @@ import {
 } from '@nestjs/common';
 import { IncludeOptions, Op, OrderItem, Transaction } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
+import { ContractDocService } from '@modules/contract/contract-doc.service';
 import { MailingService } from '../email/email.service';
 import { PaymentService } from '../payment/payment.service';
 import { ApproveServiceRequestDto } from './dto/approved-service-request.dto';
@@ -63,6 +65,7 @@ export class ServiceRequestService {
     private sequelize: Sequelize, // For transactions,
     private contractService: ContractService,
     private paymentService: PaymentService,
+    private contractDocService: ContractDocService,
   ) {}
 
   async create(createServiceRequestDto: CreateServiceRequestDto) {
@@ -751,6 +754,94 @@ export class ServiceRequestService {
       this.logger.error(
         `Failed to create immediate payment for contract #${contractId}: ${error}`,
       );
+    }
+  }
+
+  async generateContractPreview(serviceRequestId: number): Promise<Buffer> {
+    const serviceRequest = await this.serviceRequestRepository.findOneById(
+      serviceRequestId,
+      [
+        { association: 'user' },
+        { association: 'property' },
+        { association: 'service' },
+        {
+          association: 'serviceRequestProducts',
+          include: [{ association: 'product' }],
+        },
+      ],
+    );
+
+    if (!serviceRequest) {
+      throw new NotFoundException('Service request not found');
+    }
+
+    const paymentFrequency =
+      this.getPaymentFrequencyForServiceRequest(serviceRequest);
+
+    const startDate = serviceRequest.scheduledDate
+      ? new Date(serviceRequest.scheduledDate)
+      : serviceRequest.walkthroughDate
+        ? new Date(serviceRequest.walkthroughDate)
+        : new Date();
+
+    let endDate: Date = null;
+    if (serviceRequest.recurrenceEndDate) {
+      endDate = new Date(serviceRequest.recurrenceEndDate);
+    } else if (serviceRequest.isRecurring) {
+      endDate = new Date(startDate);
+      endDate.setFullYear(endDate.getFullYear() + 1);
+    }
+
+    const nextPaymentDue = this.calculateInitialNextPaymentDue(
+      new Date(startDate),
+      paymentFrequency,
+    );
+
+    const contractLike = {
+      id: null,
+      contractNumber: `SR-${serviceRequest.id}-PREVIEW`,
+      clientId: serviceRequest.userId,
+      client: serviceRequest.user,
+      propertyId: serviceRequest.propertyId,
+      property: serviceRequest.property,
+      serviceRequestId: serviceRequest.id,
+      serviceRequest,
+      startDate,
+      endDate,
+      paymentAmount: this.resolvePaymentAmount(serviceRequest),
+      paymentFrequency,
+      nextPaymentDue,
+      serviceFrequency: serviceRequest.recurrenceFrequency,
+      workStartTime: this.normalizeTime(serviceRequest.scheduledTime),
+      workEndTime: this.normalizeTime(serviceRequest.scheduledTime, 8),
+      status: ContractStatus.Draft,
+      scope:
+        serviceRequest.specialInstructions ||
+        `${serviceRequest.service?.name || 'Service'} service`,
+      notes: serviceRequest.notes,
+      estimatedDurationMinutes: serviceRequest.estimatedDurationMinutes,
+      isActive: false,
+      createdAt: serviceRequest.createdAt || new Date(),
+      updatedAt: new Date(),
+    } as Contract;
+
+    return await this.contractDocService.generateEditableContract(contractLike);
+  }
+
+  private getPaymentFrequencyForServiceRequest(
+    fullServiceRequest: ServiceRequest,
+  ): PaymentFrequency {
+    switch (fullServiceRequest.recurrenceFrequency) {
+      case RecurrenceFrequency.Weekly:
+        return PaymentFrequency.Weekly;
+      case RecurrenceFrequency.BiWeekly:
+        return PaymentFrequency.BiWeekly;
+      case RecurrenceFrequency.Monthly:
+        return PaymentFrequency.Monthly;
+      case RecurrenceFrequency.Quarterly:
+        return PaymentFrequency.Quarterly;
+      default:
+        return PaymentFrequency.OneTime;
     }
   }
 
