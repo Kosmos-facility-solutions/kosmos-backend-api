@@ -35,22 +35,16 @@ export class UpdateServiceRequestDto {
   priority?: ServiceRequestPriority;
 
   @IsOptional()
-  @IsDateString()
-  @Transform(({ value }) => (value ? new Date(value) : undefined), {
-    toClassOnly: true,
-  })
-  scheduledDate?: Date;
+  @IsString()
+  scheduledDate?: string;
 
   @IsOptional()
   @IsString()
   scheduledTime?: string;
 
   @IsOptional()
-  @IsDateString()
-  @Transform(({ value }) => (value ? new Date(value) : undefined), {
-    toClassOnly: true,
-  })
-  walkthroughDate?: Date;
+  @IsString()
+  walkthroughDate?: string;
 
   @IsOptional()
   @IsString()
@@ -94,10 +88,7 @@ export class UpdateServiceRequestDto {
   recurrenceFrequency?: RecurrenceFrequency;
 
   @IsOptional()
-  @IsDateString()
-  @Transform(({ value }) => (value ? new Date(value) : undefined), {
-    toClassOnly: true,
-  })
+  @IsString()
   recurrenceEndDate?: Date;
 
   @IsOptional()

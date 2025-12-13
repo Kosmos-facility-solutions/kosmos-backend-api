@@ -313,7 +313,29 @@ export class ServiceRequestService {
           })) ?? [];
       }
 
-      const updatePayload: Partial<ServiceRequest> = { ...payload };
+      const {
+        scheduledDate: scheduledDateInput,
+        walkthroughDate: walkthroughDateInput,
+        recurrenceEndDate: recurrenceEndDateInput,
+        ...restPayload
+      } = payload;
+      const updatePayload: Partial<ServiceRequest> = { ...restPayload };
+
+      if (scheduledDateInput) {
+        updatePayload.scheduledDate = new Date(scheduledDateInput);
+      }
+
+      if (walkthroughDateInput) {
+        updatePayload.walkthroughDate = new Date(walkthroughDateInput);
+      }
+
+      if (recurrenceEndDateInput) {
+        updatePayload.recurrenceEndDate = new Date(recurrenceEndDateInput);
+      }
+
+      if (payload.recurrenceEndDate) {
+        updatePayload.recurrenceEndDate = new Date(payload.recurrenceEndDate);
+      }
 
       if (shouldRecalculate) {
         const serviceId = updatePayload.serviceId ?? serviceRequest.serviceId;
