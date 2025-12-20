@@ -41,6 +41,9 @@ export class ContractResponseDto {
   @ApiProperty()
   paymentMethod: string;
 
+  @ApiProperty({ required: false })
+  paymentReminderLeadDays: number;
+
   @ApiProperty()
   workDays: string[];
 
@@ -110,6 +113,7 @@ export class ContractResponseDto {
     dto.nextPaymentDue = contract.nextPaymentDue;
     dto.lastPaymentDate = contract.lastPaymentDate;
     dto.paymentMethod = contract.paymentMethod;
+    dto.paymentReminderLeadDays = contract.paymentReminderLeadDays;
     dto.workDays = contract.workDays;
     dto.workStartTime = contract.workStartTime;
     dto.workEndTime = contract.workEndTime;

@@ -500,12 +500,43 @@ export class ContractPdfService {
       .text('3.1 Service Fee. ', 72, doc.y, { continued: true })
       .font('Helvetica')
       .text(
-        `Client agrees to pay Provider the sum of $${contract.paymentAmount} (${this.numberToWords(contract.paymentAmount)} dollars) ${this.formatPaymentFrequency(contract.paymentFrequency).toLowerCase()} for the Services rendered under this Agreement.`,
+        `Client agrees to pay Provider the sum of $${contract.paymentAmount} (${this.numberToWords(contract.paymentAmount)} dollars) ${this.formatPaymentFrequency(contract.paymentFrequency).toLowerCase()} for the Services rendered under this Agreement, with a payment frequency of ${this.formatPaymentFrequency(contract.paymentFrequency)}.`,
         {
           width: doc.page.width - 144,
           align: 'justify',
         },
       );
+
+    if (contract.paymentFrequency && contract.nextPaymentDue) {
+      const firstDue = format(
+        new Date(contract.nextPaymentDue),
+        'MMMM dd, yyyy',
+      );
+      doc
+        .moveDown(0.2)
+        .font('Helvetica')
+        .text(
+          `Payments will be made on a ${this.formatPaymentFrequency(contract.paymentFrequency).toLowerCase()} basis, with the next payment due on ${firstDue}.`,
+          {
+            width: doc.page.width - 144,
+            align: 'justify',
+          },
+        );
+    }
+
+    if (contract.lastPaymentDate) {
+      const lastPaid = format(
+        new Date(contract.lastPaymentDate),
+        'MMMM dd, yyyy',
+      );
+      doc
+        .moveDown(0.1)
+        .font('Helvetica')
+        .text(`The most recent payment was received on ${lastPaid}.`, {
+          width: doc.page.width - 144,
+          align: 'justify',
+        });
+    }
 
     doc.moveDown(0.8);
 

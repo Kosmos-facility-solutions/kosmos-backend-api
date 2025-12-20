@@ -271,9 +271,6 @@ export class ContractDocService {
   private buildCompensationArticle(contract: Contract): Paragraph[] {
     const amount = Number(contract.paymentAmount || 0).toFixed(2);
     const amountWords = this.numberToWords(Number(contract.paymentAmount) || 0);
-    const paymentDue = contract.nextPaymentDue
-      ? this.formatDate(contract.nextPaymentDue)
-      : 'within thirty (30) days of invoice date';
 
     const paragraphs: Paragraph[] = [
       this.sectionHeading('ARTICLE 3: COMPENSATION AND PAYMENT'),
@@ -281,11 +278,35 @@ export class ContractDocService {
         '3.1 Service Fee.',
         `Client agrees to pay Provider the sum of $${amount} (${amountWords} dollars) ${this.formatPaymentFrequency(
           contract.paymentFrequency,
-        ).toLowerCase()} for the Services rendered under this Agreement.`,
+        ).toLowerCase()} for the Services rendered under this Agreement, with a payment frequency of ${this.formatPaymentFrequency(
+          contract.paymentFrequency,
+        )}.`,
       ),
     ];
 
-    let paymentTerms = `Payment shall be due ${paymentDue}. All payments shall be made `;
+    if (contract.paymentFrequency && contract.nextPaymentDue) {
+      const firstDue = this.formatDate(contract.nextPaymentDue);
+      paragraphs.push(
+        this.createArticleParagraph(
+          '',
+          `Payments will be made on a ${this.formatPaymentFrequency(
+            contract.paymentFrequency,
+          ).toLowerCase()} basis, with the next payment due on ${firstDue}.`,
+        ),
+      );
+    }
+
+    if (contract.lastPaymentDate) {
+      const lastPaid = this.formatDate(contract.lastPaymentDate);
+      paragraphs.push(
+        this.createArticleParagraph(
+          '',
+          `The most recent payment was received on ${lastPaid}.`,
+        ),
+      );
+    }
+
+    let paymentTerms = `All payments shall be made `;
     if (contract.paymentMethod) {
       paymentTerms += `via ${contract.paymentMethod}. `;
     }

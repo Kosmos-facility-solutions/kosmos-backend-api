@@ -4,6 +4,7 @@ import {
   RecurrenceFrequency,
   ServiceRequest,
 } from '@modules/serviceRequest/entities/serviceRequest.entity';
+import { PaymentReminderLeadDays } from '../constants/payment-reminder';
 import { User } from '@modules/user/entities/user.entity';
 import { ApiHideProperty } from '@nestjs/swagger';
 import {
@@ -113,6 +114,12 @@ export class Contract extends BaseModel<Contract> {
     allowNull: true,
   })
   paymentMethod: string; // 'cash', 'check', 'bank_transfer', 'credit_card'
+
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  paymentReminderLeadDays?: PaymentReminderLeadDays | null;
 
   // ==================== CONFIGURACIÓN DE HORARIOS ====================
   @Column({

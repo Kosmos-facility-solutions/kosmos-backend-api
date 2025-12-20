@@ -4,6 +4,7 @@ import {
   IsArray,
   IsBoolean,
   IsEnum,
+  IsIn,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -17,6 +18,7 @@ import {
   ServiceRequestStatus,
 } from '../entities/serviceRequest.entity';
 import { ServiceRequestProductDto } from './service-request-product.dto';
+import { PAYMENT_REMINDER_LEAD_DAYS } from '@modules/contract/constants/payment-reminder';
 
 export class CreateServiceRequestDto {
   @ApiHideProperty()
@@ -103,4 +105,8 @@ export class CreateServiceRequestDto {
   @ValidateNested({ each: true })
   @Type(() => ServiceRequestProductDto)
   products?: ServiceRequestProductDto[];
+
+  @IsOptional()
+  @IsIn(PAYMENT_REMINDER_LEAD_DAYS)
+  paymentReminderLeadDays?: number;
 }

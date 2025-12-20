@@ -1,5 +1,9 @@
 import { config } from '@config/index';
 import { Logger } from '@core/logger/Logger';
+import {
+  DEFAULT_PAYMENT_REMINDER_LEAD_DAYS,
+  PAYMENT_REMINDER_LEAD_DAYS,
+} from '@modules/contract/constants/payment-reminder';
 import { ContractRepository } from '@modules/contract/contract.repository';
 import { Contract } from '@modules/contract/entities/contract.entity';
 import { Injectable } from '@nestjs/common';
@@ -13,14 +17,21 @@ const REMINDER_CRON = CronExpression.EVERY_10_MINUTES;
 @Injectable()
 export class PaymentReminderService {
   private readonly logger = new Logger(PaymentReminderService.name);
-  private readonly leadDays: number;
+  private readonly defaultLeadDays: number;
+  private readonly maxLeadDays: number;
 
   constructor(
     private readonly contractRepository: ContractRepository,
     private readonly paymentService: PaymentService,
     private readonly paymentRepository: PaymentRepository,
   ) {
-    this.leadDays = Number(config.paymentGateway?.reminderDays ?? 7);
+    this.defaultLeadDays = Number(
+      config.paymentGateway?.reminderDays ?? DEFAULT_PAYMENT_REMINDER_LEAD_DAYS,
+    );
+    this.maxLeadDays = Math.max(
+      this.defaultLeadDays,
+      ...PAYMENT_REMINDER_LEAD_DAYS,
+    );
   }
 
   @Cron(REMINDER_CRON)
@@ -30,16 +41,20 @@ export class PaymentReminderService {
   }
 
   private async handleUpcomingContracts() {
-    if (this.leadDays <= 0) {
+    if (this.maxLeadDays <= 0) {
       return;
     }
 
     const contracts =
       await this.contractRepository.findContractsWithUpcomingPayments(
-        this.leadDays,
+        this.maxLeadDays,
       );
 
-    await this.createPendingPaymentsForContracts(contracts, 'upcoming');
+    const eligibleContracts = contracts.filter((contract) =>
+      this.isWithinLeadWindow(contract),
+    );
+
+    await this.createPendingPaymentsForContracts(eligibleContracts, 'upcoming');
   }
 
   private async handleOverdueContracts() {
@@ -87,5 +102,27 @@ export class PaymentReminderService {
         );
       }
     }
+  }
+
+  private isWithinLeadWindow(contract: Contract): boolean {
+    if (!contract.nextPaymentDue) {
+      return false;
+    }
+
+    const leadDays = this.getLeadDaysForContract(contract);
+    if (!leadDays || leadDays <= 0) {
+      return false;
+    }
+
+    const today = new Date();
+    const dueDate = new Date(contract.nextPaymentDue);
+    const latestDate = new Date(today);
+    latestDate.setDate(latestDate.getDate() + leadDays);
+
+    return dueDate >= today && dueDate <= latestDate;
+  }
+
+  private getLeadDaysForContract(contract: Contract): number {
+    return contract.paymentReminderLeadDays || this.defaultLeadDays;
   }
 }
