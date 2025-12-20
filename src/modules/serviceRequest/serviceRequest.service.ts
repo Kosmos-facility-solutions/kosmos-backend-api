@@ -46,6 +46,7 @@ import { UpdateServiceRequestDto } from './dto/update-service-request.dto';
 import {
   RecurrenceFrequency,
   ServiceRequest,
+  ServiceRequestPaymentFrequency,
   ServiceRequestStatus,
 } from './entities/serviceRequest.entity';
 import { ServiceRequestProduct } from './entities/serviceRequestProduct.entity';
@@ -101,6 +102,7 @@ export class ServiceRequestService {
         paymentReminderLeadDays: this.normalizePaymentReminderLeadDays(
           serviceRequestPayload.paymentReminderLeadDays,
         ),
+        paymentFrequency: serviceRequestPayload.paymentFrequency,
       };
 
       const serviceRequest = await this.serviceRequestRepository.create(
@@ -333,6 +335,7 @@ export class ServiceRequestService {
         walkthroughDate: walkthroughDateInput,
         recurrenceEndDate: recurrenceEndDateInput,
         paymentReminderLeadDays,
+        paymentFrequency,
         ...restPayload
       } = payload;
       const updatePayload: Partial<ServiceRequest> = { ...restPayload };
@@ -352,6 +355,10 @@ export class ServiceRequestService {
 
       if (recurrenceEndDateInput) {
         updatePayload.recurrenceEndDate = new Date(recurrenceEndDateInput);
+      }
+
+      if (paymentFrequency !== undefined) {
+        updatePayload.paymentFrequency = paymentFrequency;
       }
 
       if (payload.recurrenceEndDate) {
@@ -673,23 +680,8 @@ export class ServiceRequestService {
     serviceRequestId: number,
   ): Promise<ContractResponseDto> {
     try {
-      let paymentFrequency: PaymentFrequency;
-      switch (fullServiceRequest.recurrenceFrequency) {
-        case RecurrenceFrequency.Weekly:
-          paymentFrequency = PaymentFrequency.Weekly;
-          break;
-        case RecurrenceFrequency.BiWeekly:
-          paymentFrequency = PaymentFrequency.BiWeekly;
-          break;
-        case RecurrenceFrequency.Monthly:
-          paymentFrequency = PaymentFrequency.Monthly;
-          break;
-        case RecurrenceFrequency.Quarterly:
-          paymentFrequency = PaymentFrequency.Quarterly;
-          break;
-        default:
-          paymentFrequency = PaymentFrequency.OneTime;
-      }
+      const paymentFrequency =
+        this.getPaymentFrequencyForServiceRequest(fullServiceRequest);
 
       const startDate = new Date(fullServiceRequest.scheduledDate);
       let endDate = null;
@@ -901,6 +893,17 @@ export class ServiceRequestService {
   private getPaymentFrequencyForServiceRequest(
     fullServiceRequest: ServiceRequest,
   ): PaymentFrequency {
+    if (fullServiceRequest.paymentFrequency) {
+      switch (fullServiceRequest.paymentFrequency) {
+        case ServiceRequestPaymentFrequency.Weekly:
+          return PaymentFrequency.Weekly;
+        case ServiceRequestPaymentFrequency.BiWeekly:
+          return PaymentFrequency.BiWeekly;
+        case ServiceRequestPaymentFrequency.Monthly:
+          return PaymentFrequency.Monthly;
+      }
+    }
+
     switch (fullServiceRequest.recurrenceFrequency) {
       case RecurrenceFrequency.Weekly:
         return PaymentFrequency.Weekly;

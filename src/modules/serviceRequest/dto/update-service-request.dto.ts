@@ -16,6 +16,7 @@ import {
   RecurrenceFrequency,
   ServiceRequestPriority,
   ServiceRequestStatus,
+  ServiceRequestPaymentFrequency,
 } from '../entities/serviceRequest.entity';
 import { ServiceRequestProductDto } from './service-request-product.dto';
 
@@ -123,4 +124,8 @@ export class UpdateServiceRequestDto {
   @IsOptional()
   @IsIn(PAYMENT_REMINDER_LEAD_DAYS)
   paymentReminderLeadDays?: number;
+
+  @IsOptional()
+  @IsEnum(ServiceRequestPaymentFrequency)
+  paymentFrequency?: ServiceRequestPaymentFrequency;
 }

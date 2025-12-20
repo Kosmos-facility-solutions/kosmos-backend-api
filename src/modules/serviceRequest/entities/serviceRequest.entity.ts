@@ -41,6 +41,12 @@ export enum RecurrenceFrequency {
   Quarterly = 'quarterly',
 }
 
+export enum ServiceRequestPaymentFrequency {
+  Weekly = 'weekly',
+  BiWeekly = 'bi_weekly',
+  Monthly = 'monthly',
+}
+
 @Table({
   tableName: 'service_request',
 })
@@ -165,6 +171,12 @@ export class ServiceRequest extends BaseModel<ServiceRequest> {
     defaultValue: false,
   })
   isRecurring: boolean;
+
+  @Column({
+    type: DataType.ENUM(...Object.values(ServiceRequestPaymentFrequency)),
+    allowNull: true,
+  })
+  paymentFrequency?: ServiceRequestPaymentFrequency | null;
 
   @Column({
     type: DataType.DATEONLY,
