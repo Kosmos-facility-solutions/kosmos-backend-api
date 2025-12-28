@@ -377,15 +377,26 @@ export class PaymentService {
   }
 
   private async safeTouchContract(payment: Payment) {
-    if (!payment.contractId) {
+    // Try to resolve the contract either directly or through the service request
+    let contract: Contract = null;
+
+    if (payment.contractId) {
+      contract = await this.contractRepository.findOneById(payment.contractId);
+    } else if (payment.serviceRequestId) {
+      contract = await this.contractRepository.findOne({
+        where: { serviceRequestId: payment.serviceRequestId },
+        order: [['createdAt', 'DESC']],
+      });
+    }
+
+    if (!contract) {
       return;
     }
 
-    const contract = await this.contractRepository.findOneById(
-      payment.contractId,
+    const nextPaymentDue = this.calculateNextPaymentDue(
+      contract,
+      payment.paidAt || new Date(),
     );
-
-    const nextPaymentDue = this.calculateNextPaymentDue(contract);
 
     await this.contractRepository.update(contract.id, {
       lastPaymentDate: new Date(),
@@ -393,32 +404,40 @@ export class PaymentService {
     });
   }
 
-  private calculateNextPaymentDue(contract: Contract): Date | null {
-    if (!contract?.nextPaymentDue) {
+  private calculateNextPaymentDue(
+    contract: Contract,
+    baseDate?: Date,
+  ): Date | null {
+    const referenceDate = contract?.nextPaymentDue
+      ? new Date(contract.nextPaymentDue)
+      : baseDate
+        ? new Date(baseDate)
+        : null;
+
+    if (!referenceDate) {
       if (contract.paymentFrequency === PaymentFrequency.OneTime) {
         return null;
       }
       return new Date();
     }
 
-    const baseDate = new Date(contract.nextPaymentDue);
     switch (contract.paymentFrequency) {
       case PaymentFrequency.Weekly:
-        baseDate.setDate(baseDate.getDate() + 7);
+        referenceDate.setDate(referenceDate.getDate() + 7);
         break;
       case PaymentFrequency.BiWeekly:
-        baseDate.setDate(baseDate.getDate() + 14);
+        referenceDate.setDate(referenceDate.getDate() + 14);
         break;
       case PaymentFrequency.Monthly:
-        baseDate.setMonth(baseDate.getMonth() + 1);
+        referenceDate.setMonth(referenceDate.getMonth() + 1);
         break;
       case PaymentFrequency.Quarterly:
-        baseDate.setMonth(baseDate.getMonth() + 3);
+        referenceDate.setMonth(referenceDate.getMonth() + 3);
         break;
       default:
         return null;
     }
-    return baseDate;
+    return referenceDate;
   }
 
   private generateReference(): string {
