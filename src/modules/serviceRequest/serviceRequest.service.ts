@@ -1,13 +1,7 @@
 import { PaginatedDto } from '@common/dto/paginated.dto';
-import { config } from '@config/index';
 import { Logger } from '@core/logger/Logger';
 import { ArrayWhereOptions } from '@libraries/baseModel.entity';
 import { generateTemporaryPassword } from '@libraries/util';
-import {
-  DEFAULT_PAYMENT_REMINDER_LEAD_DAYS,
-  PAYMENT_REMINDER_LEAD_DAYS,
-  PaymentReminderLeadDays,
-} from '@modules/contract/constants/payment-reminder';
 import { ContractDocService } from '@modules/contract/contract-doc.service';
 import { ContractService } from '@modules/contract/contract.service';
 import { ContractResponseDto } from '@modules/contract/dto/contract-response.dto';
@@ -99,9 +93,6 @@ export class ServiceRequestService {
           : null,
         estimatedPrice,
         walkthroughNotes: serviceRequestPayload.walkthroughNotes,
-        paymentReminderLeadDays: this.normalizePaymentReminderLeadDays(
-          serviceRequestPayload.paymentReminderLeadDays,
-        ),
         paymentFrequency: serviceRequestPayload.paymentFrequency,
       };
 
@@ -334,16 +325,10 @@ export class ServiceRequestService {
         scheduledDate: scheduledDateInput,
         walkthroughDate: walkthroughDateInput,
         recurrenceEndDate: recurrenceEndDateInput,
-        paymentReminderLeadDays,
         paymentFrequency,
         ...restPayload
       } = payload;
       const updatePayload: Partial<ServiceRequest> = { ...restPayload };
-
-      if (paymentReminderLeadDays !== undefined) {
-        updatePayload.paymentReminderLeadDays =
-          this.normalizePaymentReminderLeadDays(paymentReminderLeadDays);
-      }
 
       if (scheduledDateInput) {
         updatePayload.scheduledDate = new Date(scheduledDateInput);
@@ -709,9 +694,6 @@ export class ServiceRequestService {
         nextPaymentDue: nextPaymentDue
           ? nextPaymentDue.toISOString().split('T')[0]
           : null,
-        paymentReminderLeadDays:
-          fullServiceRequest.paymentReminderLeadDays ??
-          this.getDefaultPaymentReminderLeadDays(),
         serviceFrequency: fullServiceRequest.recurrenceFrequency,
         workStartTime: this.normalizeTime(fullServiceRequest.scheduledTime),
         workEndTime: this.normalizeTime(fullServiceRequest.scheduledTime, 8),
@@ -870,9 +852,6 @@ export class ServiceRequestService {
       paymentAmount: this.resolvePaymentAmount(serviceRequest),
       paymentFrequency,
       nextPaymentDue,
-      paymentReminderLeadDays:
-        serviceRequest.paymentReminderLeadDays ??
-        this.getDefaultPaymentReminderLeadDays(),
       serviceFrequency: serviceRequest.recurrenceFrequency,
       workStartTime: this.normalizeTime(serviceRequest.scheduledTime),
       workEndTime: this.normalizeTime(serviceRequest.scheduledTime, 8),
@@ -948,39 +927,6 @@ export class ServiceRequestService {
         quantity,
       }),
     );
-  }
-
-  private normalizePaymentReminderLeadDays(
-    value?: number,
-  ): PaymentReminderLeadDays | null {
-    if (value === undefined || value === null) {
-      return null;
-    }
-
-    const numeric = Number(value);
-    if (Number.isNaN(numeric)) {
-      return this.getDefaultPaymentReminderLeadDays();
-    }
-
-    return PAYMENT_REMINDER_LEAD_DAYS.includes(
-      numeric as PaymentReminderLeadDays,
-    )
-      ? (numeric as PaymentReminderLeadDays)
-      : this.getDefaultPaymentReminderLeadDays();
-  }
-
-  private getDefaultPaymentReminderLeadDays(): PaymentReminderLeadDays {
-    const configured = Number(
-      config.paymentGateway?.reminderDays ?? DEFAULT_PAYMENT_REMINDER_LEAD_DAYS,
-    );
-
-    if (
-      PAYMENT_REMINDER_LEAD_DAYS.includes(configured as PaymentReminderLeadDays)
-    ) {
-      return configured as PaymentReminderLeadDays;
-    }
-
-    return DEFAULT_PAYMENT_REMINDER_LEAD_DAYS;
   }
 
   private async calculatePriceFromSelections(

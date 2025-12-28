@@ -4,14 +4,12 @@ import {
   IsBoolean,
   IsDateString,
   IsEnum,
-  IsIn,
   IsNumber,
   IsOptional,
   IsString,
   Min,
   ValidateNested,
 } from 'class-validator';
-import { PAYMENT_REMINDER_LEAD_DAYS } from '@modules/contract/constants/payment-reminder';
 import {
   RecurrenceFrequency,
   ServiceRequestPriority,
@@ -120,10 +118,6 @@ export class UpdateServiceRequestDto {
   @ValidateNested({ each: true })
   @Type(() => ServiceRequestProductDto)
   products?: ServiceRequestProductDto[];
-
-  @IsOptional()
-  @IsIn(PAYMENT_REMINDER_LEAD_DAYS)
-  paymentReminderLeadDays?: number;
 
   @IsOptional()
   @IsEnum(ServiceRequestPaymentFrequency)

@@ -1,5 +1,4 @@
 import { PaginatedDto } from '@common/dto/paginated.dto';
-import { config } from '@config/index';
 import { Logger } from '@core/logger/Logger';
 import { ArrayWhereOptions } from '@libraries/baseModel.entity';
 import { MailingService } from '@modules/email/email.service';
@@ -17,11 +16,6 @@ import { ContractResponseDto } from './dto/contract-response.dto';
 import { CreateContractDto } from './dto/create-contract.dto';
 import { UpdateContractDto } from './dto/update-contract.dto';
 import { Contract, ContractStatus } from './entities/contract.entity';
-import {
-  DEFAULT_PAYMENT_REMINDER_LEAD_DAYS,
-  PAYMENT_REMINDER_LEAD_DAYS,
-  PaymentReminderLeadDays,
-} from './constants/payment-reminder';
 
 @Injectable()
 export class ContractService {
@@ -52,9 +46,6 @@ export class ContractService {
         nextPaymentDue: createContractDto.nextPaymentDue
           ? new Date(createContractDto.nextPaymentDue)
           : null,
-        paymentReminderLeadDays: this.normalizePaymentReminderLeadDays(
-          createContractDto.paymentReminderLeadDays,
-        ),
       };
 
       const contract = await this.contractRepository.create(contractData);
@@ -459,42 +450,6 @@ export class ContractService {
     }
 
     return await this.contractDocService.generateEditableContract(contract);
-  }
-
-  private normalizePaymentReminderLeadDays(
-    value?: number,
-  ): PaymentReminderLeadDays | null {
-    if (value === undefined || value === null) {
-      return null;
-    }
-
-    const numeric = Number(value);
-    if (Number.isNaN(numeric)) {
-      return this.getDefaultPaymentReminderLeadDays();
-    }
-
-    return PAYMENT_REMINDER_LEAD_DAYS.includes(
-      numeric as PaymentReminderLeadDays,
-    )
-      ? (numeric as PaymentReminderLeadDays)
-      : this.getDefaultPaymentReminderLeadDays();
-  }
-
-  private getDefaultPaymentReminderLeadDays(): PaymentReminderLeadDays {
-    const configured = Number(
-      config.paymentGateway?.reminderDays ??
-        DEFAULT_PAYMENT_REMINDER_LEAD_DAYS,
-    );
-
-    if (
-      PAYMENT_REMINDER_LEAD_DAYS.includes(
-        configured as PaymentReminderLeadDays,
-      )
-    ) {
-      return configured as PaymentReminderLeadDays;
-    }
-
-    return DEFAULT_PAYMENT_REMINDER_LEAD_DAYS;
   }
 
   /**

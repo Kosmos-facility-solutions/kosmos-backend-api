@@ -4,7 +4,6 @@ import {
   IsArray,
   IsDateString,
   IsEnum,
-  IsIn,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -16,10 +15,6 @@ import {
   ContractStatus,
   PaymentFrequency,
 } from '../entities/contract.entity';
-import {
-  PAYMENT_REMINDER_LEAD_DAYS,
-  PaymentReminderLeadDays,
-} from '../constants/payment-reminder';
 
 export class CreateContractDto {
   // ==================== RELACIONES ====================
@@ -110,16 +105,6 @@ export class CreateContractDto {
   @IsString()
   @MaxLength(50)
   paymentMethod?: string;
-
-  @ApiProperty({
-    description: 'Days before due date to send payment reminder',
-    enum: PAYMENT_REMINDER_LEAD_DAYS,
-    required: false,
-    example: 7,
-  })
-  @IsOptional()
-  @IsIn(PAYMENT_REMINDER_LEAD_DAYS)
-  paymentReminderLeadDays?: PaymentReminderLeadDays;
 
   // ==================== CONFIGURACIÓN DE HORARIOS ====================
   @ApiProperty({

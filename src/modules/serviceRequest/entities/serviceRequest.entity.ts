@@ -3,7 +3,6 @@ import { Property } from '@modules/property/entities/property.entity';
 import { Product } from '@modules/product/entities/product.entity';
 import { Service } from '@modules/service/entities/service.entity';
 import { User } from '@modules/user/entities/user.entity';
-import { PaymentReminderLeadDays } from '@modules/contract/constants/payment-reminder';
 import { ApiHideProperty } from '@nestjs/swagger';
 import {
   BelongsTo,
@@ -201,12 +200,6 @@ export class ServiceRequest extends BaseModel<ServiceRequest> {
     allowNull: true,
   })
   additionalServices: string[];
-
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: true,
-  })
-  paymentReminderLeadDays?: PaymentReminderLeadDays | null;
 
   @ApiHideProperty()
   @BelongsTo(() => User)
